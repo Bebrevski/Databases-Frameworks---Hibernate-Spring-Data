@@ -31,9 +31,11 @@ public class Engine implements Runnable {
 
             //this.changeTownNamesCasing();        // Problem 5
 
-            //this.printAllMinionNames             // Problem 7
+            //this.printAllMinionNames();          // Problem 7
 
-        } catch (IOException | SQLException e) {
+            //this.increaseMinionsAge();           // Problem 8 --TODO
+
+        } catch (SQLException | IOException e) {
             e.printStackTrace();
         }
     }
@@ -215,7 +217,6 @@ public class Engine implements Runnable {
     /*
     Problem 5 Change Town Names Casing
      */
-
     private void changeTownNamesCasing() throws IOException, SQLException {
         String country = reader.readLine();
 
@@ -250,8 +251,36 @@ public class Engine implements Runnable {
     /*
     Problem 7 Print All Minion Names
      */
+    private void printAllMinionNames() throws SQLException {
+        String query = "SELECT name FROM minions_db.minions";
 
-    private void printAllMinionNames(){
-        
+        PreparedStatement pr = this.connection.prepareStatement(query);
+
+        ResultSet rs = pr.executeQuery();
+
+        List<String> names = new ArrayList<>();
+
+        while(rs.next()){
+            names.add(rs.getString("name"));
+        }
+
+        for (int i = 1; i < names.size() / 2; i+=2) {
+            String temp = names.get(i);
+            names.set(i, names.get(names.size() - i));
+            names.set(names.size() - i, temp);
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for (String name : names) {
+            sb.append(name).append(System.lineSeparator());
+        }
+        System.out.println(sb);
+    }
+
+    /*
+    Problem 8 Increase Minions Age
+     */
+    private void increaseMinionsAge(){
+
     }
 }
