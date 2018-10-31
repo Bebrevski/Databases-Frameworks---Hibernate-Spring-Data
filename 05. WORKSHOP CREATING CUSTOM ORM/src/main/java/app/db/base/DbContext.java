@@ -19,5 +19,5 @@ public interface DbContext<T> {
 
     T findFirst(String where) throws InvocationTargetException, SQLException, InstantiationException, IllegalAccessException, NoSuchMethodException;
 
-    T findFirst(long id) throws SQLException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException;
+    T findById(long id) throws SQLException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException;
 }

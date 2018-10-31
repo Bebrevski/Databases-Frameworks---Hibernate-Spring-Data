@@ -20,6 +20,13 @@ import java.util.stream.Collectors;
 
 public class EntityDbContext<T> implements DbContext<T> {
 
+    private static final String CHECK_FOR_EXISTING_TABLE_QUERY = "SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = '%s'";
+    private static final String PRIMARY_KEY_COLUMN_DEFINITION = "%s %s AUTO_INCREMENT PRIMARY KEY";
+
+    //Data types in MySQL
+    private static final String INTEGER = "INT(11)";
+    private static final String VARCHAR = "VARCHAR(255)";
+
     private static final String SELECT_QUERY_TEMPLATE = "SELECT * FROM {0}";
     private static final String SELECT_WHERE_QUERY_TEMPLATE = "SELECT * FROM {0} WHERE {1}";
     private static final String SELECT_SINGLE_QUERY_TEMPLATE = "SELECT * FROM {0} LIMIT 1";
@@ -33,19 +40,22 @@ public class EntityDbContext<T> implements DbContext<T> {
     private final Connection connection;
     private final Class<T> klass;
 
-    public EntityDbContext(Connection connection, Class<T> klass) {
+    public EntityDbContext(Connection connection, Class<T> klass) throws SQLException {
         this.connection = connection;
         this.klass = klass;
+
+        if (checkIfTableExists()) {
+            //this.updateTable();
+        } else {
+            this.createTable();
+        }
     }
 
     // Add & Update
-    @Override
     public boolean persist(T entity) throws IllegalAccessException, SQLException {
         Field primaryKeyField = getPrimaryKeyField();
         primaryKeyField.setAccessible(true);
-
         long primaryKey = (long) primaryKeyField.get(entity);
-
         if (primaryKey > 0) {
             return update(entity);
         }
@@ -53,20 +63,65 @@ public class EntityDbContext<T> implements DbContext<T> {
         return insert(entity);
     }
 
+    public List<T> find() throws SQLException, IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
+        return find(null);
+    }
+
+    public List<T> find(String where) throws SQLException, IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
+        String queryTemplate = where == null
+                ? SELECT_QUERY_TEMPLATE
+                : SELECT_WHERE_QUERY_TEMPLATE;
+
+        return find(queryTemplate, where);
+    }
+
+    public List<T> find(String template, String where) throws SQLException, IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
+        String queryString = MessageFormat.format(
+                template,
+                getTableName(),
+                where
+        );
+
+        PreparedStatement query = connection.prepareStatement(queryString);
+        ResultSet resultSet = query.executeQuery();
+
+        return toList(resultSet);
+    }
+
+    public T findFirst() throws SQLException, IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
+        return find(SELECT_SINGLE_QUERY_TEMPLATE, null)
+                .get(0);
+    }
+
+    public T findFirst(String where) throws SQLException, IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
+        return find(SELECT_SINGLE_WHERE_QUERY_TEMPLATE, where)
+                .get(0);
+    }
+
+    public T findById(long id) throws IllegalAccessException, SQLException, InstantiationException, NoSuchMethodException, InvocationTargetException {
+        String primaryKeyName =
+                getPrimaryKeyField().getAnnotation(PrimaryKey.class)
+                        .name();
+
+        String whereString = MessageFormat.format(
+                WHERE_PRIMARY_KEY,
+                primaryKeyName,
+                id
+        );
+        return findFirst(whereString);
+    }
+
     private boolean insert(T entity) throws SQLException {
         List<String> columns = new ArrayList<>();
         List<Object> values = new ArrayList<>();
 
-        Arrays.stream(klass.getDeclaredFields())
-                .filter(field -> field.isAnnotationPresent(Column.class))
-                .collect(Collectors.toList())
+        getColumnFields()
                 .forEach(field -> {
                     try {
                         field.setAccessible(true);
-                        String columnName = field.getAnnotation(Column.class).name();
-
+                        String columnName = field.getAnnotation(Column.class)
+                                .name();
                         Object value = field.get(entity);
-
                         columns.add(columnName);
                         values.add(value);
 
@@ -75,7 +130,7 @@ public class EntityDbContext<T> implements DbContext<T> {
                     }
                 });
 
-        String columnNames = String.join(", ", columns);
+        String columnsNames = String.join(", ", columns);
         String columnValues = values
                 .stream()
                 .map(value -> {
@@ -88,59 +143,64 @@ public class EntityDbContext<T> implements DbContext<T> {
                 .map(Object::toString)
                 .collect(Collectors.joining(", "));
 
-        String query = MessageFormat.format(
+        String queryString = MessageFormat.format(
                 INSERT_QUERY_TEMPLATE,
                 getTableName(),
-                columnNames,
+                columnsNames,
                 columnValues
         );
 
-        return connection.prepareStatement(query).execute();
+        return connection.prepareStatement(queryString)
+                .execute();
     }
 
-    private boolean update(T entity) throws IllegalAccessException, SQLException {
-        List<String> updateQuery = getColumnFields()
-                .stream()
-                .map(field -> {
-                    field.setAccessible(true);
-                    try {
-                        String columnName = field.getAnnotation(Column.class).name();
-                        Object value = field.get(entity);
+    private boolean update(T entity) throws SQLException, IllegalAccessException {
+        List<String> updateQueries =
+                getColumnFields().stream()
+                        .map(field -> {
+                            field.setAccessible(true);
+                            try {
+                                String columnName = field.getAnnotation(Column.class)
+                                        .name();
+                                Object value = field.get(entity);
+                                if (value instanceof String) {
+                                    value = "\'" + value + "\'";
+                                }
 
-                        if (value instanceof String) {
-                            value = "\'" + value + "\'";
-                        }
+                                return MessageFormat.format(
+                                        SET_QUERY_TEMPLATE,
+                                        columnName,
+                                        value
+                                );
+                            } catch (IllegalAccessException e) {
+                                e.printStackTrace();
+                            }
+                            return null;
+                        })
+                        .collect(Collectors.toList());
 
-                        return MessageFormat.format(
-                                SET_QUERY_TEMPLATE,
-                                columnName,
-                                value
-                        );
-                    } catch (IllegalAccessException e) {
-                        e.printStackTrace();
-                    }
-
-                    return null;
-                })
-                .collect(Collectors.toList());
-
-        String updateQueriesString = String.join(", ", updateQuery);
+        String updateQueriesString = String.join(", ", updateQueries);
 
         Field primaryKey = getPrimaryKeyField();
         primaryKey.setAccessible(true);
+        String primaryKeyName =
+                primaryKey.getAnnotation(PrimaryKey.class)
+                        .name();
 
-        String primaryKeyName = primaryKey.getAnnotation(PrimaryKey.class).name();
+        long primaryKeyValue =
+                (long) primaryKey
+                        .get(entity);
 
-        long primaryKeyValue = (long) primaryKey.get(entity);
-
-        String query = MessageFormat.format(
+        String queryString = MessageFormat.format(
                 UPDATE_QUERY_TEMPLATE,
                 getTableName(),
+                updateQueriesString,
                 primaryKeyName,
-                primaryKey
+                primaryKeyValue
         );
 
-        return connection.prepareStatement(query).execute();
+        return connection.prepareStatement(queryString)
+                .execute();
     }
 
     private String getTableName() {
@@ -153,57 +213,23 @@ public class EntityDbContext<T> implements DbContext<T> {
             return klass.getSimpleName().toLowerCase() + "s";
         }
 
-        return klass.getAnnotation(Entity.class).name();
+        return klass.getAnnotation(Entity.class)
+                .name();
     }
 
-    private Field getPrimaryKeyField() {
-        return Arrays.stream(klass.getDeclaredFields())
-                .filter(field -> field.isAnnotationPresent(PrimaryKey.class))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Class " + klass + "does not have a primary key annotation"));
-    }
-
-
-    @Override
-    public List<T> find() throws SQLException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
-        return find(null);
-    }
-
-    @Override
-    public List<T> find(String where) throws SQLException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
-        String queryTemplate = where == null
-                ? SELECT_QUERY_TEMPLATE
-                : SELECT_WHERE_QUERY_TEMPLATE;
-
-        return find(queryTemplate, where);
-    }
-
-    @Override
-    public List<T> find(String template, String where) throws SQLException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
-        String queryString = MessageFormat.format(
-                template,
-                getTableName(),
-                where
-        );
-
-        PreparedStatement ps = connection.prepareStatement(queryString);
-        ResultSet resultSet = ps.executeQuery();
-
-        return toList(resultSet);
-    }
-
-    private List<T> toList(ResultSet resultSet) throws SQLException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+    private List<T> toList(ResultSet resultSet) throws SQLException, InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
         List<T> result = new ArrayList<>();
 
         while (resultSet.next()) {
             T entity = this.createEntity(resultSet);
+            result.add(entity);
         }
 
         return result;
     }
 
-    private T createEntity(ResultSet resultSet) throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException, SQLException {
-        T entity = klass.getConstructor().newInstance();
+    private T createEntity(ResultSet resultSet) throws IllegalAccessException, InstantiationException, SQLException, NoSuchMethodException, InvocationTargetException {
+        T entity = klass.getDeclaredConstructor().newInstance();
         List<Field> columnFields = getColumnFields();
 
         Field primaryKeyField = getPrimaryKeyField();
@@ -234,34 +260,46 @@ public class EntityDbContext<T> implements DbContext<T> {
         return entity;
     }
 
-    private List<Field> getColumnFields(){
+    private List<Field> getColumnFields() {
         return Arrays.stream(klass.getDeclaredFields())
                 .filter(field -> field.isAnnotationPresent(Column.class))
                 .collect(Collectors.toList());
     }
 
-    @Override
-    public T findFirst() throws SQLException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
-        return find(SELECT_SINGLE_QUERY_TEMPLATE, null).get(0);
+    private Field getPrimaryKeyField() {
+        return Arrays.stream(klass.getDeclaredFields())
+                .filter(field -> field.isAnnotationPresent(PrimaryKey.class))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Class " + klass + " does not have a primary key annotation"));
     }
 
-    @Override
-    public T findFirst(String where) throws InvocationTargetException, SQLException, InstantiationException, IllegalAccessException, NoSuchMethodException {
-       return find(SELECT_SINGLE_WHERE_QUERY_TEMPLATE, where).get(0);
+    private boolean checkIfTableExists() throws SQLException {
+        String query = String.format(
+                CHECK_FOR_EXISTING_TABLE_QUERY,
+                getTableName());
+
+        return this.connection.prepareStatement(query).executeQuery().next();
     }
 
-    @Override
-    public T findFirst(long id) throws SQLException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
-        String primaryKeyName =
-                getPrimaryKeyField().getAnnotation(PrimaryKey.class)
-                        .name();
+    private void createTable() {
+//        CREATE TABLE %s(%s, first_name %s, last_name %s);
 
-        String whereString = MessageFormat.format(
-                WHERE_PRIMARY_KEY,
-                primaryKeyName,
-                id
-        );
+        String primaryKeyColumnDefinition = String.format(PRIMARY_KEY_COLUMN_DEFINITION
+                , getPrimaryKeyField().getDeclaredAnnotation(PrimaryKey.class).name()
+                , getColumnTypeAsString(getPrimaryKeyField()));
 
-        return findFirst(whereString);
+        
+    }
+
+    private String getColumnTypeAsString(Field field) {
+        field.setAccessible(true);
+
+        if (field.getType() == long.class || field.getType() == Long.class) {
+            return INTEGER;
+        } else if (field.getType() == String.class) {
+            return VARCHAR;
+        }
+
+        return null;
     }
 }

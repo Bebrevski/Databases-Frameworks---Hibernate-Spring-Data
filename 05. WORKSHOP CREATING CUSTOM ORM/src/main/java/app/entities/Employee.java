@@ -47,4 +47,12 @@ public class Employee {
     public void setLastName(String lastName) {
         this.lastName = lastName;
     }
+
+    @Override
+    public String toString() {
+        return String.format("%d | %s | %s"
+                , this.employeeId
+                , this.firstName
+                , this.lastName);
+    }
 }
