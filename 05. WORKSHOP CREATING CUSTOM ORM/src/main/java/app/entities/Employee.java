@@ -16,12 +16,26 @@ public class Employee {
     @Column(name = "last_name")
     private String lastName;
 
+    @Column(name = "age")
+    private int age;
+
+    @Column(name = "ucn")
+    private String ucn;
+
     public Employee() {
     }
 
-    public Employee(String firstName, String lastName) {
+    public Employee(String firstName, String lastName, int age) {
         this.setFirstName(firstName);
         this.setLastName(lastName);
+        this.setAge(age);
+    }
+
+    public Employee(String firstName, String lastName, int age, String ucn) {
+        this.setFirstName(firstName);
+        this.setLastName(lastName);
+        this.setAge(age);
+        this.setUcn(ucn);
     }
 
     public long getEmployeeId() {
@@ -48,11 +62,28 @@ public class Employee {
         this.lastName = lastName;
     }
 
+    public int getAge() {
+        return this.age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+
+    public String getUcn() {
+        return this.ucn;
+    }
+
+    public void setUcn(String ucn) {
+        this.ucn = ucn;
+    }
+
     @Override
     public String toString() {
-        return String.format("%d | %s | %s"
+        return String.format("%d | %s | %s | %d"
                 , this.employeeId
                 , this.firstName
-                , this.lastName);
+                , this.lastName
+                , this.age);
     }
 }

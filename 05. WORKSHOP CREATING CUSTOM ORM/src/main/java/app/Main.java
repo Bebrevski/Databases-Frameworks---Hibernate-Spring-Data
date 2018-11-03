@@ -2,6 +2,7 @@ package app;
 
 import app.db.EntityDbContext;
 import app.db.base.DbContext;
+import app.entities.Department;
 import app.entities.Employee;
 
 import java.lang.reflect.InvocationTargetException;
@@ -11,20 +12,26 @@ import java.sql.SQLException;
 
 public class Main {
 
-    private static final String CONNECTION_STRING = "jdbc:mysql://localhost:3306/soft_uni_simple";
+    private static final String CONNECTION_STRING = "jdbc:mysql://localhost:3306/soft_uni_simple?useSSL=false";
     private static final String USER = "root";
     private static final String PASSWORD = "";
 
     public static void main(String[] args) throws SQLException, IllegalAccessException, NoSuchMethodException, InvocationTargetException, InstantiationException {
         Connection connection = getConnection();
+
         DbContext<Employee> employeeDbContext = getContext(connection, Employee.class);
 
-        //
+//        Employee employee = new Employee("Pesho", "Peshev", 22, "");
+//        employeeDbContext.persist(employee);
+
+        DbContext<Department> departmentDbContext = getContext(connection, Department.class);
+//        Department department = new Department("Java Devs", "Programista");
+//        departmentDbContext.persist(department);
 
         connection.close();
     }
 
-    private static DbContext<Employee> getContext(Connection connection, Class<Employee> klass) throws SQLException {
+    private static <T> DbContext<T> getContext(Connection connection, Class<T> klass) throws SQLException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
         return new EntityDbContext<>(connection, klass);
     }
 

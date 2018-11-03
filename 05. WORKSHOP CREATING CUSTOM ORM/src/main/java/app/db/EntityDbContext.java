@@ -22,6 +22,9 @@ public class EntityDbContext<T> implements DbContext<T> {
 
     private static final String CHECK_FOR_EXISTING_TABLE_QUERY = "SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = '%s'";
     private static final String PRIMARY_KEY_COLUMN_DEFINITION = "%s %s AUTO_INCREMENT PRIMARY KEY";
+    private static final String CREATE_TABLE_TEMPLATE = "CREATE TABLE %s(%s, %s);";
+    private static final String GET_COLUMN_NAMES_FROM_TABLE_TEMPLATE = "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = '%s'";
+    private static final String ALTER_TABLE_TEMPLATE = "ALTER TABLE %s %s;";
 
     //Data types in MySQL
     private static final String INTEGER = "INT(11)";
@@ -40,12 +43,12 @@ public class EntityDbContext<T> implements DbContext<T> {
     private final Connection connection;
     private final Class<T> klass;
 
-    public EntityDbContext(Connection connection, Class<T> klass) throws SQLException {
+    public EntityDbContext(Connection connection, Class<T> klass) throws SQLException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         this.connection = connection;
         this.klass = klass;
 
         if (checkIfTableExists()) {
-            //this.updateTable();
+            this.updateTable();
         } else {
             this.createTable();
         }
@@ -281,25 +284,86 @@ public class EntityDbContext<T> implements DbContext<T> {
         return this.connection.prepareStatement(query).executeQuery().next();
     }
 
-    private void createTable() {
-//        CREATE TABLE %s(%s, first_name %s, last_name %s);
-
+    private void createTable() throws SQLException {
         String primaryKeyColumnDefinition = String.format(PRIMARY_KEY_COLUMN_DEFINITION
                 , getPrimaryKeyField().getDeclaredAnnotation(PrimaryKey.class).name()
                 , getColumnTypeAsString(getPrimaryKeyField()));
 
-        
+        String columnsDefinition = this.getColumnFields().stream()
+                .map(field -> field.getAnnotation(Column.class).name() + " " + VARCHAR)
+                .collect(Collectors.joining(", "));
+
+        String query = String.format(CREATE_TABLE_TEMPLATE
+                , this.getTableName()
+                , primaryKeyColumnDefinition
+                , columnsDefinition);
+
+        this.connection.prepareStatement(query).execute();
     }
 
     private String getColumnTypeAsString(Field field) {
         field.setAccessible(true);
 
-        if (field.getType() == long.class || field.getType() == Long.class) {
+        if (field.getType() == long.class || field.getType() == Long.class ||
+                field.getType() == int.class || field.getType() == Integer.class) {
             return INTEGER;
         } else if (field.getType() == String.class) {
             return VARCHAR;
         }
 
         return null;
+    }
+
+    private void updateTable() throws SQLException, IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
+        List<String> entityColumnNames = this.getColumnFields().stream()
+                .map(field -> field.getAnnotation(Column.class).name())
+                .collect(Collectors.toList());
+
+        entityColumnNames.add(this.getPrimaryKeyField().getDeclaredAnnotation(PrimaryKey.class).name());
+
+        List<String> databaseColumnNames = this.getDatabaseTableColumnNames();
+
+        List<String> newColumnNames = entityColumnNames
+                .stream()
+                .filter(columnName -> !databaseColumnNames.contains(columnName))
+                .collect(Collectors.toList());
+
+        List<Field> newFields = this.getColumnFields()
+                .stream()
+                .filter(field -> newColumnNames.contains(field.getDeclaredAnnotation(Column.class).name()))
+                .collect(Collectors.toList());
+
+        List<String> columnDefinitions = new ArrayList<>();
+
+        newFields.forEach(field -> {
+            String columnDefinition = String.format("ADD COLUMN %s %s"
+                    , field.getDeclaredAnnotation(Column.class).name()
+                    , this.getColumnTypeAsString(field));
+
+            columnDefinitions.add(columnDefinition);
+        });
+
+        String query = String.format(ALTER_TABLE_TEMPLATE
+                , getTableName()
+                , columnDefinitions.stream().collect(Collectors.joining(", ")));
+
+        this.connection.prepareStatement(query).execute();
+    }
+
+    private List<String> getDatabaseTableColumnNames() throws SQLException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        String query = String.format(
+                GET_COLUMN_NAMES_FROM_TABLE_TEMPLATE,
+                getTableName()
+        );
+
+        ResultSet resultSet = this.connection.prepareStatement(query).executeQuery();
+
+        List<String> columnNames = new ArrayList<>();
+
+        while (resultSet.next()) {
+            columnNames.add(resultSet.getString(1));
+        }
+
+        return columnNames;
     }
 }
