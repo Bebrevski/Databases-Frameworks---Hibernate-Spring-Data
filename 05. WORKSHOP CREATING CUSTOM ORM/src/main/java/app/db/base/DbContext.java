@@ -20,4 +20,6 @@ public interface DbContext<T> {
     T findFirst(String where) throws InvocationTargetException, SQLException, InstantiationException, IllegalAccessException, NoSuchMethodException;
 
     T findById(long id) throws SQLException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException;
+
+    boolean delete(String where) throws SQLException;
 }

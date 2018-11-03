@@ -25,6 +25,7 @@ public class EntityDbContext<T> implements DbContext<T> {
     private static final String CREATE_TABLE_TEMPLATE = "CREATE TABLE %s(%s, %s);";
     private static final String GET_COLUMN_NAMES_FROM_TABLE_TEMPLATE = "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = '%s'";
     private static final String ALTER_TABLE_TEMPLATE = "ALTER TABLE %s %s;";
+    private static final String DELETE_TEMPLATE = "DELETE FROM %s WHERE %s;";
 
     //Data types in MySQL
     private static final String INTEGER = "INT(11)";
@@ -365,5 +366,14 @@ public class EntityDbContext<T> implements DbContext<T> {
         }
 
         return columnNames;
+    }
+
+    @Override
+    public boolean delete(String where) throws SQLException {
+        String query = String.format(DELETE_TEMPLATE
+                , this.getTableName()
+                , where);
+
+        return this.connection.prepareStatement(query).execute();
     }
 }

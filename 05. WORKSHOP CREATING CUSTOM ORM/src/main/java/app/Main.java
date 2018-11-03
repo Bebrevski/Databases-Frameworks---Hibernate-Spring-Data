@@ -21,12 +21,15 @@ public class Main {
 
         DbContext<Employee> employeeDbContext = getContext(connection, Employee.class);
 
-//        Employee employee = new Employee("Pesho", "Peshev", 22, "");
-//        employeeDbContext.persist(employee);
+        Employee employee = new Employee("Pesho", "Peshev", 22, "");
+        employeeDbContext.persist(employee);
 
         DbContext<Department> departmentDbContext = getContext(connection, Department.class);
-//        Department department = new Department("Java Devs", "Programista");
-//        departmentDbContext.persist(department);
+        Department department = new Department("Java Devs", "Programista");
+        departmentDbContext.persist(department);
+
+        //employeeDbContext.delete("employee_id = 1");
+        employeeDbContext.delete("first_name = 'Pesho'");
 
         connection.close();
     }
