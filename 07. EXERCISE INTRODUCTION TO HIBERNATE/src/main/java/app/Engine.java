@@ -2,11 +2,14 @@ package app;
 
 import app.entities.Address;
 import app.entities.Employee;
+import app.entities.Project;
 import app.entities.Town;
 import app.interfaces.Runnable;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
+import java.math.BigDecimal;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Scanner;
 
@@ -55,8 +58,10 @@ public class Engine implements Runnable {
                     findLatest10Projects();
                     break;
                 case 10:
+                    increaseSalaries();
                     break;
                 case 11:
+                    removeTowns();
                     break;
                 case 12:
                     break;
@@ -233,6 +238,53 @@ public class Engine implements Runnable {
 
     //9.	Find Latest 10 Projects
     private void findLatest10Projects() {
+
+        StringBuilder sb = new StringBuilder();
+
+        this.entityManager.createQuery("" +
+                "SELECT p FROM Project AS p " +
+                "ORDER BY p.startDate DESC", Project.class)
+                .setMaxResults(10)
+                .getResultList()
+                .stream()
+                .sorted(Comparator.comparing(Project::getName))
+                .forEach(p -> sb
+                        .append("Project name: ").append(p.getName())
+                        .append(System.lineSeparator())
+                        .append("\t").append("Project Description: ").append(p.getDescription())
+                        .append(System.lineSeparator())
+                        .append("\t").append("Project Start Date: ").append(p.getStartDate())
+                        .append(System.lineSeparator())
+                        .append("\t").append("Project End Date: ").append(p.getEndDate())
+                        .append(System.lineSeparator())
+                );
+
+        System.out.println(sb);
+    }
+
+    //10.	Increase Salaries
+    private void increaseSalaries() {
+        this.entityManager.getTransaction().begin();
+
+        this.entityManager.createQuery("" +
+                "SELECT e FROM Employee AS e " +
+                "WHERE e.department.name IN ('Engineering', 'Tool Design', 'Marketing', 'Information Services')" +
+                "ORDER BY e.id", Employee.class)
+                .getResultList()
+                .forEach(e -> {
+                    e.setSalary(e.getSalary().multiply(BigDecimal.valueOf(1.12)));
+
+                    System.out.println(String.format("%s %s ($%.2f)"
+                            , e.getFirstName()
+                            , e.getLastName()
+                            , e.getSalary()));
+                });
+
+        this.entityManager.getTransaction().commit();
+    }
+
+    //11.	Remove Towns
+    private void removeTowns(){
         
     }
 }
