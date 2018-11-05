@@ -1,9 +1,6 @@
 package app;
 
-import app.entities.Address;
-import app.entities.Employee;
-import app.entities.Project;
-import app.entities.Town;
+import app.entities.*;
 import app.interfaces.Runnable;
 
 import javax.persistence.EntityManager;
@@ -64,10 +61,13 @@ public class Engine implements Runnable {
                     removeTowns();
                     break;
                 case 12:
+                    findEmployeesByFirstName();
                     break;
                 case 13:
+                    employeesMaximumSalaries();
                     break;
                 default:
+                    System.out.println("You have entered invalid problem number. Enter between 2 and 13 inclusive!");
                     break;
             }
 
@@ -284,7 +284,83 @@ public class Engine implements Runnable {
     }
 
     //11.	Remove Towns
-    private void removeTowns(){
-        
+    private void removeTowns() {
+        System.out.println("Enter town: ");
+        String townToRemove = this.scanner.nextLine();
+
+        try {
+
+            Town town = this.entityManager.createQuery("" +
+                    "SELECT t FROM Town AS t WHERE t.name = :town", Town.class)
+                    .setParameter("town", townToRemove)
+                    .getSingleResult();
+
+            List<Address> addresses = this.entityManager.createQuery("" +
+                    "SELECT a FROM Address AS a " +
+                    "WHERE a.town.name = :town", Address.class)
+                    .setParameter("town", townToRemove)
+                    .getResultList();
+
+            System.out.println(String.format("%d address%s in %s deleted"
+                    , addresses.size()
+                    , addresses.size() != 1 ? "es" : ""
+                    , town.getName()));
+
+            this.entityManager.getTransaction().begin();
+
+            for (Address address : addresses) {
+                for (Employee employee : address.getEmployees()) {
+                    employee.setAddress(null);
+                }
+
+                address.setTown(null);
+                this.entityManager.remove(address);
+            }
+
+            this.entityManager.remove(town);
+
+            this.entityManager.getTransaction().commit();
+
+        } catch (NoResultException | IllegalArgumentException ex) {
+            System.out.println("You have entered invalid town. Start over!");
+            this.entityManager.getTransaction().rollback();
+        }
+    }
+
+    //12.	Find Employees by First Name
+    private void findEmployeesByFirstName() {
+        System.out.println("Enter pattern: ");
+        String pattern = this.scanner.nextLine();
+
+        try {
+            this.entityManager.createQuery("" +
+                    "SELECT e FROM Employee AS e " +
+                    "WHERE e.firstName LIKE :pattern", Employee.class)
+                    .setParameter("pattern", pattern + "%")
+                    .getResultList()
+                    .forEach(e -> System.out.println(String.format("%s %s - %s - ($%.2f)"
+                            , e.getFirstName()
+                            , e.getLastName()
+                            , e.getJobTitle()
+                            , e.getSalary())));
+        } catch (NoResultException ex) {
+            System.out.println("No employees with entered pattern. Start over!");
+        }
+
+    }
+
+    //13.	Employees Maximum Salaries
+    private void employeesMaximumSalaries() {
+        this.entityManager.createQuery("" +
+                "SELECT e FROM Employee AS e " +
+                "WHERE e.salary NOT BETWEEN 30000 AND 70000" +
+                "GROUP BY e.department.name " +
+                "ORDER BY e.salary DESC", Employee.class)
+                .getResultList()
+                .stream()
+                .sorted(Comparator.comparing(e2 -> e2.getDepartment().getId()))
+                .forEach(e -> System.out.println(String.format("%s - %.2f"
+                        , e.getDepartment().getName()
+                        , e.getSalary())));
     }
 }
