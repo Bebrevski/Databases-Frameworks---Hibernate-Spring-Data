@@ -49,8 +49,10 @@ public class Engine implements Runnable {
                     addressesWithEmployeeCount();
                     break;
                 case 8:
+                    getEmployeeWithProject();
                     break;
                 case 9:
+                    findLatest10Projects();
                     break;
                 case 10:
                     break;
@@ -150,32 +152,37 @@ public class Engine implements Runnable {
         System.out.println("Enter requested employee name: ");
         String name = this.scanner.nextLine();
 
-        Employee employee = this.entityManager.createQuery("" +
-                "SELECT e FROM Employee AS e " +
-                "WHERE e.lastName = :lastName", Employee.class)
-                .setParameter("lastName", name)
-                .getSingleResult();
+        try {
+            Employee employee = this.entityManager.createQuery("" +
+                    "SELECT e FROM Employee AS e " +
+                    "WHERE e.lastName = :lastName", Employee.class)
+                    .setParameter("lastName", name)
+                    .getSingleResult();
 
-        Town sofia = this.entityManager.createQuery("" +
-                "SELECT t FROM Town AS t " +
-                "WHERE t.name = 'Sofia'", Town.class)
-                .getSingleResult();
+            Town sofia = this.entityManager.createQuery("" +
+                    "SELECT t FROM Town AS t " +
+                    "WHERE t.name = 'Sofia'", Town.class)
+                    .getSingleResult();
 
-        Address address = new Address();
-        address.setText("Vitoshka 15");
-        address.setTown(sofia);
+            Address address = new Address();
+            address.setText("Vitoshka 15");
+            address.setTown(sofia);
 
-        this.entityManager.getTransaction().begin();
+            this.entityManager.getTransaction().begin();
 
-        this.entityManager.persist(address);
+            this.entityManager.persist(address);
 
-        employee.setAddress(address);
+            employee.setAddress(address);
 
-        entityManager.getTransaction().commit();
+            entityManager.getTransaction().commit();
 
-        System.out.printf("%s %s changed address to %s, %s%n",
-                employee.getFirstName(), employee.getLastName(),
-                employee.getAddress().getText(), employee.getAddress().getTown().getName());
+            System.out.printf("%s %s changed address to %s, %s%n",
+                    employee.getFirstName(), employee.getLastName(),
+                    employee.getAddress().getText(), employee.getAddress().getTown().getName());
+        } catch (NoResultException ex) {
+            System.out.println("You have entered invalid Last Name. Start over!");
+            this.entityManager.getTransaction().rollback();
+        }
     }
 
     //7.	Addresses with Employee Count
@@ -192,5 +199,40 @@ public class Engine implements Runnable {
     }
 
     //8.	Get Employee with Project
-    
+    private void getEmployeeWithProject() {
+        System.out.println("Enter employee Id: ");
+        int employeeId = Integer.parseInt(this.scanner.nextLine());
+
+        try {
+
+            Employee employee = this.entityManager.createQuery("" +
+                    "SELECT e FROM Employee AS e " +
+                    "WHERE e.id = :id ", Employee.class)
+                    .setParameter("id", employeeId)
+                    .getSingleResult();
+
+            StringBuilder sb = new StringBuilder();
+            sb
+                    .append(employee.getFirstName())
+                    .append(" ")
+                    .append(employee.getLastName())
+                    .append(" - ")
+                    .append(employee.getJobTitle())
+                    .append(System.lineSeparator());
+
+            employee.getProjects().stream()
+                    .sorted((p1, p2) -> p1.getName().compareTo(p2.getName()))
+                    .forEach(p -> sb.append("\t").append(p.getName()).append(System.lineSeparator()));
+
+            System.out.println(sb);
+
+        } catch (NoResultException ex) {
+            System.out.println("You have entered invalid id. Start over!");
+        }
+    }
+
+    //9.	Find Latest 10 Projects
+    private void findLatest10Projects() {
+        
+    }
 }
