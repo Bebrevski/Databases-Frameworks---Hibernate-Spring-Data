@@ -14,6 +14,10 @@ public class BasicLabel implements Label {
     private String subTitle;
     private BasicShampoo basicShampoo;
 
+    public BasicLabel(){
+
+    }
+
     public BasicLabel(String title, String subTitle) {
         this.setTitle(title);
         this.setSubtitle(subTitle);

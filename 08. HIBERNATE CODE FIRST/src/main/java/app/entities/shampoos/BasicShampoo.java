@@ -83,7 +83,7 @@ public class BasicShampoo implements Shampoo {
         this.size = size;
     }
 
-    @OneToOne(optional = true, cascade = CascadeType.ALL,
+    @OneToOne(cascade = CascadeType.ALL,
             fetch = FetchType.LAZY)
     @JoinColumn(name = "label", referencedColumnName = "id")
     @Override
