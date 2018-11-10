@@ -6,6 +6,7 @@ import app.salesDatabase.Product;
 import app.salesDatabase.Sale;
 import app.salesDatabase.StoreLocation;
 import app.universitySystemDatabase.Course;
+import app.universitySystemDatabase.Person;
 import app.universitySystemDatabase.Student;
 import app.universitySystemDatabase.Teacher;
 
@@ -36,7 +37,9 @@ public class Engine implements Runnable {
 
         // universitySystem();            // Task 3
 
-        // hospitalDatabase();            // Task 4
+        // hospitalDatabase();            // Task 4 //TODO
+
+        // billsPaymentSystem();          // Task 5
     }
 
     //1.	Gringotts Database
@@ -135,10 +138,30 @@ public class Engine implements Runnable {
         this.manager.persist(course);
 
         this.manager.getTransaction().commit();
+
+        CriteriaBuilder criteriaBuilder = this.manager.getCriteriaBuilder();
+
+        CriteriaQuery<Course> query = criteriaBuilder.createQuery(Course.class);
+
+        query.from(Course.class);
+
+        this.manager.createQuery(query)
+                .getResultList()
+                .forEach(c -> System.out.println(String.format("Course name:%s\n%s\n%s"
+                        , c.getName()
+                        , c.getStudents().stream()
+                                .map(Person::getFirstName)
+                                .collect(Collectors.joining(", "))
+                        , c.getTeacher().getFirstName())));
     }
 
     //4.	Hospital Database
-    private void hospitalDatabase(){
+    private void hospitalDatabase() {
+
+    }
+
+    //5.	Bills Payment System
+    private void billsPaymentSystem(){
 
     }
 }

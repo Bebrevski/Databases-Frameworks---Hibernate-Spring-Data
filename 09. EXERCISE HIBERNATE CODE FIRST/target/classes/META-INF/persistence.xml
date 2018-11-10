@@ -11,7 +11,7 @@
             <property name="hibernate.connection.password"
                       value=""/>
             <property name="hibernate.dialect"
-                      value="org.hibernate.dialect.MySQL5Dialect"/>
+                      value="org.hibernate.dialect.MariaDBDialect"/>
             <property name="hibernate.hbm2ddl.auto"
                       value="update"/>
             <property name="hibernate.show_sql"
