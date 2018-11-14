@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class AuthorServiceImpl implements AuthorService {
@@ -38,5 +40,15 @@ public class AuthorServiceImpl implements AuthorService {
 
             this.authorRepository.saveAndFlush(author);
         }
+    }
+
+    @Override
+    public List<String> getAuthorByCountOfBooks() {
+        return this.authorRepository.findAuthorsByOrderByBooksDesc().stream()
+                .map(a -> String.format("%s %s %d"
+                        , a.getFirstName()
+                        , a.getLastName()
+                        , a.getBooks().size()))
+                .collect(Collectors.toList());
     }
 }

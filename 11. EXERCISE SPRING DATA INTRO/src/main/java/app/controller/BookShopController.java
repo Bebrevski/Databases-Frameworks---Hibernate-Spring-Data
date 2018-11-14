@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Controller;
 
-import java.util.List;
+import java.util.Set;
 
 @Controller
 public class BookShopController implements CommandLineRunner {
@@ -29,8 +29,24 @@ public class BookShopController implements CommandLineRunner {
         this.categoryService.seedCategory();
         this.bookService.seedBooks();
 
-        List<String> bookTitles = this.bookService.getAllBooksTitlesAfter();
+        //Task 1
 
-        System.out.println(String.join("\r\n", bookTitles));
+        //this.bookService.getAllBooksTitlesAfter()
+        //.forEach(System.out::println);
+
+        //Task 2
+
+        //this.bookService.getAllAuthorsWithBookAfter()
+        //.forEach(System.out::println);
+
+        //Task 3
+
+        //this.authorService.getAuthorByCountOfBooks()
+        //.forEach(System.out::println);
+
+        //Task 4
+
+        //this.bookService.getAllBooksFromGivenAuthor()
+                //.forEach(System.out::println);
     }
 }

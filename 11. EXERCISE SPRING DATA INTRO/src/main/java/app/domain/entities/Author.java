@@ -1,13 +1,14 @@
 package app.domain.entities;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
+import javax.persistence.*;
+import java.util.List;
 
 @Entity(name = "authors")
 public class Author extends BaseEntity {
 
     private String firstName;
     private String lastName;
+    private List<Book> books;
 
     public Author() {
     }
@@ -28,5 +29,14 @@ public class Author extends BaseEntity {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
+    }
+
+    @OneToMany(mappedBy = "author", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    public List<Book> getBooks() {
+        return this.books;
+    }
+
+    public void setBooks(List<Book> books) {
+        this.books = books;
     }
 }

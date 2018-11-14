@@ -10,4 +10,8 @@ import java.util.List;
 @Repository
 public interface BookRepository extends JpaRepository<Book, Long> {
     List<Book> findAllByReleaseDateAfter(LocalDate date);
+
+    List<Book> findAllByReleaseDateBefore(LocalDate date);
+
+    List<Book> findAllByAuthor_FirstNameAndAuthor_LastNameOrderByReleaseDateDescTitleAsc(String firstName, String lastName);
 }

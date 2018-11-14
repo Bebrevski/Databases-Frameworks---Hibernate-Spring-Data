@@ -84,11 +84,35 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public List<String> getAllBooksTitlesAfter() {
+    public Set<String> getAllBooksTitlesAfter() {
         List<Book> books = this.bookRepository
                 .findAllByReleaseDateAfter(LocalDate.parse("2000-12-31"));
 
-        return books.stream().map(Book::getTitle).collect(Collectors.toList());
+        return books.stream().map(Book::getTitle).collect(Collectors.toSet());
+    }
+
+    @Override
+    public Set<String> getAllAuthorsWithBookAfter() {
+        List<Book> books = this.bookRepository
+                .findAllByReleaseDateBefore(LocalDate.parse("1990-01-01"));
+
+        return books.stream()
+                .map(b -> String.format("%s %s"
+                        , b.getAuthor().getFirstName()
+                        , b.getAuthor().getLastName()))
+                .collect(Collectors.toSet());
+    }
+
+    @Override
+    public List<String> getAllBooksFromGivenAuthor() {
+        return this.bookRepository
+                .findAllByAuthor_FirstNameAndAuthor_LastNameOrderByReleaseDateDescTitleAsc("Amy", "Porter")
+                .stream()
+                .map(b -> String.format("%s %s %d"
+                        , b.getTitle()
+                        , b.getReleaseDate()
+                        , b.getCopies()))
+                .collect(Collectors.toList());
     }
 
     private Author getRandomAuthor() {
@@ -107,7 +131,7 @@ public class BookServiceImpl implements BookService {
         return this.categoryRepository.findById((long) randomId).orElse(null);
     }
 
-    private Set<Category> getRandomCategories(){
+    private Set<Category> getRandomCategories() {
         Set<Category> categories = new LinkedHashSet<>();
 
         Random random = new Random();
