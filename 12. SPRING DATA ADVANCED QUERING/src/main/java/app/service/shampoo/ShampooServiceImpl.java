@@ -20,7 +20,13 @@ public class ShampooServiceImpl implements ShampooService {
 
     @Override
     public List<String> selectShampoosBySize(String inputSize) {
-        Size size = Size.valueOf(inputSize.toUpperCase());
+
+        Size size = null;
+        try {
+            size = Size.valueOf(inputSize.toUpperCase());
+        } catch (IllegalStateException ex) {
+            System.out.println("You have entered invalid size");
+        }
 
         return this.shampooRepository.findAllBySize(size).stream()
                 .map(s -> String.format("%s %s %.2flv."
