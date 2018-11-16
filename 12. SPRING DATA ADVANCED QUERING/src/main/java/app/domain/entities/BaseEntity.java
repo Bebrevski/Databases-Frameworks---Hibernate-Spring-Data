@@ -1,4 +1,4 @@
-package advancedquerying.domain.entities;
+package app.domain.entities;
 
 import javax.persistence.*;
 
