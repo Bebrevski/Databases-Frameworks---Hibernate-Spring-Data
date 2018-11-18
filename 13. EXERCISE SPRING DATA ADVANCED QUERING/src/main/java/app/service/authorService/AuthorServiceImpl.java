@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class AuthorServiceImpl implements AuthorService {
@@ -38,5 +40,24 @@ public class AuthorServiceImpl implements AuthorService {
 
             this.authorRepository.saveAndFlush(author);
         }
+    }
+
+    @Override
+    public List<String> getAllAuthorsFirstNameStartsWith(String letter) {
+        String wildCard = "%" + letter;
+
+        //Invoke of Custom Method in AuthorRepository
+
+        return this.authorRepository.findAllByFirstNameEndsWithCustomQuery(wildCard)
+                .stream()
+                .map(a -> a.getFirstName() + " " + a.getLastName())
+                .collect(Collectors.toList());
+
+        //Invoke of Built in Method in Author Repository
+
+//       return this.authorRepository.findAllByFirstNameEndsWith(letter)
+//               .stream()
+//               .map(a -> a.getFirstName() + " " + a.getLastName())
+//               .collect(Collectors.toList());
     }
 }

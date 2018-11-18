@@ -84,7 +84,7 @@ public class BookServiceImpl implements BookService {
     public List<String> getAllBooksTitlesAfter() {
         List<Book> books = this.bookRepository.findAllByReleaseDateAfter(LocalDate.parse("2000-12-31"));
 
-        return books.stream().map(b -> b.getTitle()).collect(Collectors.toList());
+        return books.stream().map(Book::getTitle).collect(Collectors.toList());
     }
 
     @Override
@@ -92,6 +92,66 @@ public class BookServiceImpl implements BookService {
         List<Book> books = this.bookRepository.findAllByReleaseDateBefore(LocalDate.parse("1990-01-01"));
 
         return books.stream().map(b -> String.format("%s %s", b.getAuthor().getFirstName(), b.getAuthor().getLastName())).collect(Collectors.toSet());
+    }
+
+    @Override
+    public List<String> getAllBooksByAgeRestriction(String ageRestrictionInput) {
+        AgeRestriction ageRestriction = AgeRestriction.valueOf(ageRestrictionInput.toUpperCase());
+
+        return this.bookRepository.findAllByAgeRestriction(ageRestriction)
+                .stream()
+                .map(Book::getTitle)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<String> getAllGoldenBooks() {
+        EditionType editionType = EditionType.GOLD;
+        Integer copies = 5000;
+
+        return this.bookRepository.findAllByEditionTypeAndCopiesIsLessThan(editionType, copies)
+                .stream()
+                .map(Book::getTitle)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<String> getAllBooksByPrice() {
+        BigDecimal price1 = BigDecimal.valueOf(5.00);
+        BigDecimal price2 = BigDecimal.valueOf(40.00);
+
+        return this.bookRepository
+                .findAllByPriceIsLessThanOrPriceIsGreaterThan(price1, price2)
+                .stream()
+                .map(b -> String.format("%s - $%.2f"
+                        , b.getTitle()
+                        , b.getPrice()))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<String> getAllNotReleasedBooks(String year) {
+        LocalDate dateBefore = LocalDate.parse(year + "-01-01");
+        LocalDate dateAfter = LocalDate.parse(year + "-12-31");
+
+        return this.bookRepository
+                .findAllByReleaseDateBeforeOrReleaseDateAfter(dateBefore, dateAfter)
+                .stream()
+                .map(Book::getTitle)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<String> getAllBooksBeforeDate(String year) {
+        LocalDate date = LocalDate.parse(year, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+
+        return this.bookRepository.findAllByReleaseDateBefore(date)
+                .stream()
+                .map(b -> String.format("%s - %s - $%.2f"
+                        , b.getTitle()
+                        , b.getAgeRestriction().name()
+                        , b.getPrice()))
+                .collect(Collectors.toList());
     }
 
     private Author getRandomAuthor() {

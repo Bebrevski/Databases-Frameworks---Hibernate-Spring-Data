@@ -11,4 +11,14 @@ public interface BookService {
     List<String> getAllBooksTitlesAfter();
 
     Set<String> getAllAuthorsWithBookBefore();
+
+    List<String> getAllBooksByAgeRestriction(String ageRestriction);
+
+    List<String> getAllGoldenBooks();
+
+    List<String> getAllBooksByPrice();
+
+    List<String> getAllNotReleasedBooks(String year);
+
+    List<String> getAllBooksBeforeDate(String year);
 }
