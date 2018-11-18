@@ -20,4 +20,12 @@ public interface AuthorRepository extends JpaRepository<Author, Integer> {
             "FROM app.domain.entities.Author AS a " +
             "WHERE a.firstName LIKE :wildCard")
     List<Author> findAllByFirstNameEndsWithCustomQuery(@Param(value = "wildCard") String wildCard);
+
+    @Query("" +
+            "SELECT CONCAT(a.firstName, ' ', a.lastName, ' - ', SUM(b.copies)) " +
+            "FROM app.domain.entities.Author AS a " +
+            "JOIN app.domain.entities.Book AS b ON b.author = a " +
+            "GROUP BY a.id " +
+            "ORDER BY SUM(b.copies) DESC ")
+    List<Object> getTotalNumberOfBookCopiesByAuthor();
 }

@@ -60,4 +60,12 @@ public class AuthorServiceImpl implements AuthorService {
 //               .map(a -> a.getFirstName() + " " + a.getLastName())
 //               .collect(Collectors.toList());
     }
+
+    @Override
+    public List<String> getTotalNumberOfCopiesByAuthor() {
+        return this.authorRepository.getTotalNumberOfBookCopiesByAuthor()
+                .stream()
+                .map(Object::toString)
+                .collect(Collectors.toList());
+    }
 }

@@ -154,6 +154,45 @@ public class BookServiceImpl implements BookService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<String> getAllBooksByGivenPattern(String pattern) {
+        String wildcard = "%" + pattern + "%";
+
+        return this.bookRepository.findAllByGivenPattern(wildcard)
+                .stream()
+                .map(Book::getTitle)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<String> getAllBooksWhereAuthorNameFitsThePattern(String pattern) {
+        String wildCard = pattern + "%";
+
+        return this.bookRepository.findAllByAuthorLastNameStartsWith(wildCard)
+                .stream()
+                .map(b -> String.format("%s (%s %s)"
+                        , b.getTitle()
+                        , b.getAuthor().getFirstName()
+                        , b.getAuthor().getLastName()))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public int getNumberOfBooksWithTitleLongerThan(int length) {
+        return this.bookRepository.findAllBooksWhereTitleLengthIsLongerThan(length).size();
+    }
+
+    @Override
+    public String getBookByGivenTitle(String inputTitle) {
+        Book book = this.bookRepository.findBookByTitle(inputTitle);
+
+        return String.format("%s %s %s $%.2f"
+                , book.getTitle()
+                , book.getEditionType()
+                , book.getAgeRestriction()
+                , book.getPrice());
+    }
+
     private Author getRandomAuthor() {
         Random random = new Random();
 

@@ -21,4 +21,12 @@ public interface BookService {
     List<String> getAllNotReleasedBooks(String year);
 
     List<String> getAllBooksBeforeDate(String year);
+
+    List<String> getAllBooksByGivenPattern(String pattern);
+
+    List<String> getAllBooksWhereAuthorNameFitsThePattern(String pattern);
+
+    int getNumberOfBooksWithTitleLongerThan(int length);
+
+    String getBookByGivenTitle(String inputTitle);
 }
