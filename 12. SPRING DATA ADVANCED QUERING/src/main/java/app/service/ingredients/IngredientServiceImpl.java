@@ -26,4 +26,13 @@ public class IngredientServiceImpl implements IngredientService{
                 .map(Ingredient::getName)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public List<String> selectIngredientsByNames(List<String> names) {
+        return this.ingredientRepository.findAllByNameIn(names)
+                .stream()
+                .map(Ingredient::getName)
+                .collect(Collectors.toList());
+    }
+
 }

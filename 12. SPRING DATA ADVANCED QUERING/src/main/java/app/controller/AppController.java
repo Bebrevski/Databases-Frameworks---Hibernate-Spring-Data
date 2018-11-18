@@ -37,10 +37,19 @@ public class AppController implements CommandLineRunner {
         //selectShampoosByPrice();
 
         //Task 4
-        selectIngredientsByName();
+        //selectIngredientsByName();
+
+        //Task 5
+        //selectIngredientsByNames();
+
+        //Task 6
+        //countShampoosByPrice();
 
         //Task 7
         //selectShampoosByIngredients();
+
+        //Task 8
+        selectShampoosByIngredientsCount();
     }
 
     //1.	Select Shampoos by Size
@@ -72,7 +81,7 @@ public class AppController implements CommandLineRunner {
     }
 
     //3.	Select Shampoos by Price
-    private void selectShampoosByPrice(){
+    private void selectShampoosByPrice() {
         BigDecimal minPrice = new BigDecimal(scanner.nextLine());
 
         this.shampooService.selectShampoosByPrice(minPrice)
@@ -80,11 +89,30 @@ public class AppController implements CommandLineRunner {
     }
 
     //4.	Select Ingredients by Name
-    private void selectIngredientsByName(){
+    private void selectIngredientsByName() {
         String letter = scanner.nextLine();
 
         this.ingredientService.selectIngredientsByName(letter)
                 .forEach(System.out::println);
+    }
+
+    //5.	Select Ingredients by Names
+    private void selectIngredientsByNames() {
+        List<String> lines = new ArrayList<>();
+
+        String line;
+        while (!"".equals(line = scanner.nextLine())) {
+            lines.add(line);
+        }
+
+        this.ingredientService.selectIngredientsByNames(lines)
+                .forEach(System.out::println);
+    }
+
+    //6.	Count Shampoos by Price
+    private void countShampoosByPrice() {
+        BigDecimal inputPrice = new BigDecimal(scanner.nextLine());
+        System.out.println(this.shampooService.countShampoosByPriceLessThan(inputPrice));
     }
 
     //7.	Select Shampoos by Ingredients
@@ -97,6 +125,14 @@ public class AppController implements CommandLineRunner {
         }
 
         this.shampooService.selectShampoosByIngredients(lines)
+                .forEach(System.out::println);
+    }
+
+    //8.	Select Shampoos by Ingredients Count
+    private void selectShampoosByIngredientsCount() {
+        int count = Integer.parseInt(scanner.nextLine());
+
+        this.shampooService.selectShampoosByIngredientsCount(count)
                 .forEach(System.out::println);
     }
 }

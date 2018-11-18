@@ -27,4 +27,13 @@ public interface ShampooRepository extends JpaRepository<Shampoo, Long> {
     List<Shampoo> findAllByLabelIdOrSizeOrderByPriceAsc(Long labelId, Size size);
 
     List<Shampoo> findAllByPriceGreaterThanOrderByPriceDesc(BigDecimal price);
+
+    Integer countByPriceLessThan(BigDecimal price);
+
+    @Query("" +
+            "SELECT s FROM app.domain.entities.Shampoo AS s " +
+            "JOIN s.ingredients AS i " +
+            "GROUP BY s.id " +
+            "HAVING s.ingredients.size < :ingredientsCount ")
+    List<Shampoo> findAllByIngredientsCountLessThan(@Param(value = "ingredientsCount") int number);
 }

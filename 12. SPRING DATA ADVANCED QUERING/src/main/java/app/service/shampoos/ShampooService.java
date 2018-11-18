@@ -14,4 +14,8 @@ public interface ShampooService {
     List<String> getShampoosByLabelOrSize(Long labelId, String size);
 
     List<String> selectShampoosByPrice(BigDecimal minPrice);
+
+    Integer countShampoosByPriceLessThan(BigDecimal inputPrice);
+
+    List<String> selectShampoosByIngredientsCount(int count);
 }

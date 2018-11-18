@@ -91,6 +91,19 @@ public class ShampooServiceImpl implements ShampooService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public Integer countShampoosByPriceLessThan(BigDecimal inputPrice) {
+        return this.shampooRepository.countByPriceLessThan(inputPrice);
+    }
+
+    @Override
+    public List<String> selectShampoosByIngredientsCount(int count) {
+        return this.shampooRepository.findAllByIngredientsCountLessThan(count)
+                .stream()
+                .map(Shampoo::getBrand)
+                .collect(Collectors.toList());
+    }
+
     private Function<Shampoo, String> getFormat() {
         return s -> String.format("%s %s %.2flv."
                 , s.getBrand()
