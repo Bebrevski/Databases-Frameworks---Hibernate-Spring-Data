@@ -1,5 +1,8 @@
 package app.dto;
 
+import app.entities.Employee;
+import org.modelmapper.ModelMapper;
+
 import java.math.BigDecimal;
 
 public class EmployeeDTO {
@@ -38,5 +41,20 @@ public class EmployeeDTO {
 
     public void setSalary(BigDecimal salary) {
         this.salary = salary;
+    }
+
+    public static void initMaps(ModelMapper mapper) {
+        mapper.createTypeMap(Employee.class, EmployeeDTO.class)
+                .addMapping(
+                        Employee::getFirstName,
+                        EmployeeDTO::setFirstName)
+                .addMapping(
+                        Employee::getLastName,
+                        EmployeeDTO::setLastName
+                )
+                .addMapping(
+                        Employee::getSalary,
+                        EmployeeDTO::setSalary
+                );
     }
 }
