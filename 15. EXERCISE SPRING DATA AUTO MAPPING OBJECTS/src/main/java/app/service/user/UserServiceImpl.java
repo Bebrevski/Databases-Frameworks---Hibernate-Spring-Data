@@ -1,5 +1,6 @@
 package app.service.user;
 
+import app.domain.dtos.GameAddDTO;
 import app.domain.dtos.UserLoginDTO;
 import app.domain.dtos.UserLogoutDTO;
 import app.domain.dtos.UserRegisterDTO;
@@ -50,7 +51,14 @@ public class UserServiceImpl implements UserService {
             }
 
         } else {
-            User entity = this.modelMapper.map(userRegisterDTO, User.class);
+            User entity = this.userRepository.findByEmail(userRegisterDTO.getEmail()).orElse(null);
+
+            if (entity != null) {
+                sb.append("User already exists!").append(System.lineSeparator());
+                return sb.toString();
+            }
+
+            entity = this.modelMapper.map(userRegisterDTO, User.class);
 
             if (this.userRepository.count() == 0) {
                 entity.setRole(Role.ADMIN);
@@ -82,9 +90,9 @@ public class UserServiceImpl implements UserService {
             User entity = this.userRepository.findByEmail(userLoginDTO.getEmail())
                     .orElse(null);
 
-            if(entity == null) {
+            if (entity == null) {
                 return sb.append("User does not exist!").append(System.lineSeparator()).toString();
-            } else if(!entity.getPassword().equals(userLoginDTO.getPassword())){
+            } else if (!entity.getPassword().equals(userLoginDTO.getPassword())) {
                 return sb.append("Wrong password").append(System.lineSeparator()).toString();
             }
 
@@ -101,12 +109,27 @@ public class UserServiceImpl implements UserService {
                 .orElse(null);
 
         StringBuilder sb = new StringBuilder();
-        if(entity == null) {
+        if (entity == null) {
             return sb.append("User does not exist!").append(System.lineSeparator()).toString();
         }
 
         sb.append(String.format("User %s successfully logged out", entity.getFullName()));
 
         return sb.toString();
+    }
+
+    @Override
+    public boolean isAdmin(String email) {
+        User entity = this.userRepository.findByEmail(email).orElse(null);
+
+        if(entity != null) {
+            return entity.getRole().equals(Role.ADMIN);
+        }
+
+        return false;
+    }
+
+    public String addGame(GameAddDTO gameAddDTO){
+return null;
     }
 }

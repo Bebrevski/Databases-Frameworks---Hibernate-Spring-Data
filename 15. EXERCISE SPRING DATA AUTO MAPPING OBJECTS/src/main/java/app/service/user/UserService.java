@@ -11,4 +11,6 @@ public interface UserService {
     String loginUser(UserLoginDTO userLoginDTO);
 
     String logoutUser(UserLogoutDTO userLogoutDTO);
+
+    boolean isAdmin(String email);
 }

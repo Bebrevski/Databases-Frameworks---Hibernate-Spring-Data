@@ -29,6 +29,10 @@ public class GameStoreController implements CommandLineRunner {
         while (true) {
             String input = this.scanner.nextLine();
 
+            if ("end".equals(input.toLowerCase())) {
+                break;
+            }
+
             String[] inputParams = input.split("\\|");
 
             switch (inputParams[0]) {
@@ -66,6 +70,14 @@ public class GameStoreController implements CommandLineRunner {
                         System.out.println(logoutResult);
 
                         this.loggedInUser = null;
+                    }
+                    break;
+
+                case "AddGame":
+                    if (this.loggedInUser != null && this.userService.isAdmin(this.loggedInUser)) {
+
+                    } else {
+                        System.out.println("Cannot log out. No user was logged in.");
                     }
                     break;
             }
