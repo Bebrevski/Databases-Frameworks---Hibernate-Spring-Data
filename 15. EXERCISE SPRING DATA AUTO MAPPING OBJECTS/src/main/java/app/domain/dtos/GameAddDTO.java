@@ -7,28 +7,25 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import java.math.BigDecimal;
-import java.time.LocalDate;
 
 public class GameAddDTO {
     private String title;
+    private BigDecimal price;
+    private Double size;
     private String trailer;
     private String imageThumbnail;
-    private Double size;
-    private BigDecimal price;
     private String description;
-    private LocalDate releaseDate;
 
     public GameAddDTO() {
     }
 
-    public GameAddDTO(String title, String trailer, String imageThumbnail, Double size, BigDecimal price, String description, LocalDate releaseDate) {
+    public GameAddDTO(String title, BigDecimal price, Double size, String trailer, String imageThumbnail, String description) {
         this.title = title;
+        this.price = price;
+        this.size = size;
         this.trailer = trailer;
         this.imageThumbnail = imageThumbnail;
-        this.size = size;
-        this.price = price;
         this.description = description;
-        this.releaseDate = releaseDate;
     }
 
     @NotNull(message = "Title can not be null!")
@@ -44,7 +41,7 @@ public class GameAddDTO {
         this.title = title;
     }
 
-    @Length(min = 11, max = 11)
+    @Length(min = 11, max = 11, message = "Length must be exactly 11 symbols!")
     public String getTrailer() {
         return this.trailer;
     }
@@ -53,7 +50,7 @@ public class GameAddDTO {
         this.trailer = trailer;
     }
 
-    @Pattern(regexp = "(http(s)?:\\/\\/)?(.)+")
+    @Pattern(regexp = "(http(s)?:\\/\\/)?(.)+", message = "Invalid image!")
     public String getImageThumbnail() {
         return this.imageThumbnail;
     }
@@ -63,7 +60,7 @@ public class GameAddDTO {
     }
 
     @Min(0)
-    @Digits(integer = 19, fraction = 1)
+    @Digits(integer = 19, fraction = 1, message = "Size do not match!")
     public Double getSize() {
         return this.size;
     }
@@ -73,7 +70,7 @@ public class GameAddDTO {
     }
 
     @Min(0)
-    @Digits(integer = 19, fraction = 2)
+    @Digits(integer = 19, fraction = 2, message = "Price do not match!")
     public BigDecimal getPrice() {
         return this.price;
     }
@@ -82,20 +79,12 @@ public class GameAddDTO {
         this.price = price;
     }
 
-    @Length(min = 20)
+    @Length(min = 20, message = "Description do not match!")
     public String getDescription() {
         return this.description;
     }
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public LocalDate getReleaseDate() {
-        return this.releaseDate;
-    }
-
-    public void setReleaseDate(LocalDate releaseDate) {
-        this.releaseDate = releaseDate;
     }
 }

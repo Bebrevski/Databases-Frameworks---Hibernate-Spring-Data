@@ -1,13 +1,16 @@
 package app.web.controllers;
 
+import app.domain.dtos.GameAddDTO;
 import app.domain.dtos.UserLoginDTO;
 import app.domain.dtos.UserLogoutDTO;
 import app.domain.dtos.UserRegisterDTO;
+import app.service.game.GameService;
 import app.service.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Controller;
 
+import java.math.BigDecimal;
 import java.util.Scanner;
 
 @Controller
@@ -17,11 +20,13 @@ public class GameStoreController implements CommandLineRunner {
 
     private final Scanner scanner;
     private final UserService userService;
+    private final GameService gameService;
 
     @Autowired
-    public GameStoreController(Scanner scanner, UserService userService) {
+    public GameStoreController(Scanner scanner, UserService userService, GameService gameService) {
         this.scanner = scanner;
         this.userService = userService;
+        this.gameService = gameService;
     }
 
     @Override
@@ -75,7 +80,17 @@ public class GameStoreController implements CommandLineRunner {
 
                 case "AddGame":
                     if (this.loggedInUser != null && this.userService.isAdmin(this.loggedInUser)) {
+                        System.out.println();
+                        GameAddDTO gameAddDTO = new GameAddDTO(
+                                inputParams[1],
+                                new BigDecimal(inputParams[2]),
+                                Double.parseDouble(inputParams[3]),
+                                inputParams[4],
+                                inputParams[5],
+                                inputParams[6]
+                        );
 
+                        System.out.println(this.gameService.addGame(gameAddDTO));
                     } else {
                         System.out.println("Cannot log out. No user was logged in.");
                     }

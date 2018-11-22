@@ -122,14 +122,10 @@ public class UserServiceImpl implements UserService {
     public boolean isAdmin(String email) {
         User entity = this.userRepository.findByEmail(email).orElse(null);
 
-        if(entity != null) {
+        if (entity != null) {
             return entity.getRole().equals(Role.ADMIN);
         }
 
         return false;
-    }
-
-    public String addGame(GameAddDTO gameAddDTO){
-return null;
     }
 }
