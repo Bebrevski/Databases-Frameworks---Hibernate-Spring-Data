@@ -1,0 +1,47 @@
+[
+  {
+    "name": "Allopurinol",
+    "price": 518.50,
+    "seller": "null Fox"
+  },
+  {
+    "name": "Topiramate",
+    "price": 578.77,
+    "seller": "Nicole Harris"
+  },
+  {
+    "name": "Glipizide",
+    "price": 621.78,
+    "seller": "null Baker"
+  },
+  {
+    "name": "Foaming Hand Sanitizer",
+    "price": 624.72,
+    "seller": "Ann Stevens"
+  },
+  {
+    "name": "Prostate",
+    "price": 716.05,
+    "seller": "Gloria Alexander"
+  },
+  {
+    "name": "Warfarin Sodium",
+    "price": 770.05,
+    "seller": "null Peterson"
+  },
+  {
+    "name": "RESCRIPTOR",
+    "price": 850.52,
+    "seller": "Gary Stevens"
+  },
+  {
+    "name": "Perrigo Benzoyl Peroxide",
+    "price": 873.24,
+    "seller": "Diana Harvey"
+  },
+  {
+    "name": "Myristica Argentum Sinus Relief",
+    "price": 904.52,
+    "seller": "Wanda Harris"
+  }
+]

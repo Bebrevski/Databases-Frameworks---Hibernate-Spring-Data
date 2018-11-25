@@ -2,11 +2,10 @@ package app.domain.entities;
 
 import app.domain.entities.base.BaseEntity;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity(name = "products")
 public class Product extends BaseEntity {
@@ -14,9 +13,10 @@ public class Product extends BaseEntity {
     private BigDecimal price;
     private User buyerId;
     private User sellerId;
-    //private List<Category> categories;
+    private List<Category> categories;
 
     public Product() {
+        this.categories = new ArrayList<>();
     }
 
     @Column(name = "name", nullable = false)
@@ -55,5 +55,19 @@ public class Product extends BaseEntity {
 
     public void setSellerId(User sellerId) {
         this.sellerId = sellerId;
+    }
+
+    @ManyToMany(targetEntity = Category.class)
+    @JoinTable(
+            name = "categories_products",
+            joinColumns = @JoinColumn(name = "product_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "category_id", referencedColumnName = "id")
+    )
+    public List<Category> getCategories() {
+        return this.categories;
+    }
+
+    public void setCategories(List<Category> categories) {
+        this.categories = categories;
     }
 }
