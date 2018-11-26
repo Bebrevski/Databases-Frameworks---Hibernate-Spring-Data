@@ -32,7 +32,7 @@ public class CustomerServiceImpl implements CustomerService{
             }
 
             Customer entity = this.modelMapper.map(customerImportDto, Customer.class);
-            entity.setBirthDate(LocalDate.parse());
+            entity.setBirthDate(LocalDate.parse(customerImportDto.getBirthDate()));
 
             this.customerRepository.saveAndFlush(entity);
         }

@@ -43,7 +43,7 @@ public class Car extends BaseEntity {
         this.travelledDistance = travelledDistance;
     }
 
-    @ManyToMany(targetEntity = Part.class)
+    @ManyToMany(targetEntity = Part.class, fetch = FetchType.EAGER)
     @JoinTable(
             name = "parts_cars",
             joinColumns = @JoinColumn(name = "car_id", referencedColumnName = "id"),

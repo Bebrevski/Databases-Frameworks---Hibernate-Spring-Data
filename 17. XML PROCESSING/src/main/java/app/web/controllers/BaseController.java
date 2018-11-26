@@ -8,17 +8,21 @@ import org.springframework.stereotype.Controller;
 public class BaseController implements CommandLineRunner {
 
     private final ImportController importController;
+    private final ExportController exportController;
 
     @Autowired
-    protected BaseController(ImportController importController) {
+    protected BaseController(ImportController importController, ExportController exportController) {
         this.importController = importController;
+        this.exportController = exportController;
     }
 
     @Override
     public void run(String... args) throws Exception {
-        //this.importController.importSuppliers();
-        //this.importController.importParts();
-        //this.importController.importCars();
-        this.importController.importCustomers();
+        System.out.println(this.importController.importSuppliers());
+        System.out.println(this.importController.importParts());
+        System.out.println(this.importController.importCars());
+        System.out.println(this.importController.importCustomers());
+
+        System.out.println(this.exportController.exportCars());
     }
 }

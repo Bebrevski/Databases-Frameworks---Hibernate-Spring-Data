@@ -1,7 +1,11 @@
 package app.services.car;
 
+import app.domain.dtos.car.CarExportDto;
+import app.domain.dtos.car.CarExportRootDto;
 import app.domain.dtos.car.CarImportDto;
 import app.domain.dtos.car.CarImportRootDto;
+import app.domain.dtos.part.PartExportDto;
+import app.domain.dtos.part.PartExportRootDto;
 import app.domain.entities.Car;
 import app.domain.entities.Part;
 import app.repositories.CarRepository;
@@ -43,6 +47,35 @@ public class CarServiceImpl implements CarService {
 
             this.carRepository.saveAndFlush(entity);
         }
+    }
+
+    @Override
+    public CarExportRootDto exportCars() {
+        List<Car> carEntities = this.carRepository.findAll();
+        List<CarExportDto> carExportDtos = new ArrayList<>();
+
+        for (Car carEntity : carEntities) {
+            CarExportDto carExportDto = this.modelMapper.map(carEntity, CarExportDto.class);
+
+            List<PartExportDto> partExportDtos = new ArrayList<>();
+
+            for (Part part : carEntity.getParts()) {
+                PartExportDto partExportDto = this.modelMapper.map(part, PartExportDto.class);
+
+                partExportDtos.add(partExportDto);
+            }
+
+            PartExportRootDto partExportRootDto = new PartExportRootDto();
+            partExportRootDto.setPartExportDtos(partExportDtos);
+
+            carExportDto.setPartExportRootDto(partExportRootDto);
+
+            carExportDtos.add(carExportDto);
+        }
+
+        CarExportRootDto carExportRootDto = new CarExportRootDto();
+        carExportRootDto.setCarExportDtos(carExportDtos);
+        return carExportRootDto;
     }
 
     private List<Part> getRandomParts() {
