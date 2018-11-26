@@ -1,4 +1,4 @@
-package app.services;
+package app.services.supplier;
 
 import app.domain.dtos.supplier.SupplierImportRootDto;
 

@@ -16,8 +16,9 @@ public class BaseController implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        this.importController.importSuppliers();
-
-
+        //this.importController.importSuppliers();
+        //this.importController.importParts();
+        //this.importController.importCars();
+        this.importController.importCustomers();
     }
 }
