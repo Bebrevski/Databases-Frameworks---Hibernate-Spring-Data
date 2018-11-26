@@ -1,6 +1,6 @@
 package app.util;
 
-import javax.xml.bind.JAXBException;
+import javax.xml.bind.*;
 import java.io.FileNotFoundException;
 
 public interface XmlParser {
