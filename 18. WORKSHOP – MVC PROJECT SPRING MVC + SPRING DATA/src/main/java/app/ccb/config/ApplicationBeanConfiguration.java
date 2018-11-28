@@ -1,7 +1,11 @@
 package app.ccb.config;
 
 import app.ccb.util.FileUtil;
+import app.ccb.util.FileUtilImpl;
 import app.ccb.util.ValidationUtil;
+import app.ccb.util.ValidationUtilImpl;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,20 +15,24 @@ public class ApplicationBeanConfiguration {
 
     @Bean
     public FileUtil fileUtil() {
-        // TODO : Implement Me
-//        return new FileUtilImpl();
-        return null;
+        return new FileUtilImpl();
     }
 
     @Bean
     public ValidationUtil validationUtil() {
-        // TODO : Implement Me
-        //        return new ValidationUtilImpl();
-        return null;
+        return new ValidationUtilImpl();
     }
 
     @Bean
     public ModelMapper modelMapper() {
         return new ModelMapper();
+    }
+
+    @Bean
+    public Gson gson(){
+        return new GsonBuilder()
+                .excludeFieldsWithoutExposeAnnotation()
+                .setPrettyPrinting()
+                .create();
     }
 }
