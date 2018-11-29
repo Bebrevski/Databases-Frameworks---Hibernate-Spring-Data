@@ -1,16 +1,18 @@
 package app.ccb.domain.entities;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.OneToOne;
+import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity(name = "clients")
 public class Client extends BaseEntity{
     private String fullName;
     private Integer age;
+    private List<Employee> employees;
     private BankAccount bankAccount;
 
     public Client() {
+        this.employees = new ArrayList<>();
     }
 
     @Column(name = "full_name", nullable = false)
@@ -38,5 +40,19 @@ public class Client extends BaseEntity{
 
     public void setBankAccount(BankAccount bankAccount) {
         this.bankAccount = bankAccount;
+    }
+
+    @ManyToMany(targetEntity = Employee.class)
+    @JoinTable(
+            name = "employees_clients",
+            joinColumns = @JoinColumn(name = "client_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "employee_id", referencedColumnName = "id")
+    )
+    public List<Employee> getEmployees() {
+        return this.employees;
+    }
+
+    public void setEmployees(List<Employee> employees) {
+        this.employees = employees;
     }
 }
