@@ -2,6 +2,7 @@ package app.ccb.services;
 
 import app.ccb.domain.dtos.EmployeeImportDto;
 import app.ccb.domain.entities.Branch;
+import app.ccb.domain.entities.Client;
 import app.ccb.domain.entities.Employee;
 import app.ccb.repositories.BranchRepository;
 import app.ccb.repositories.EmployeeRepository;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 @Service
 public class EmployeeServiceImpl implements EmployeeService {
@@ -79,7 +81,7 @@ public class EmployeeServiceImpl implements EmployeeService {
             this.employeeRepository.saveAndFlush(entity);
 
             sb
-                    .append(String.format("Successfully imported - %s %s"
+                    .append(String.format("Successfully imported Employee- %s %s"
                             , entity.getFirstName()
                             , entity.getLastName()))
                     .append(System.lineSeparator());
@@ -91,7 +93,30 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public String exportTopEmployees() {
-        // TODO : Implement Me
-        return null;
+        List<Employee> employeesEntities = this.employeeRepository.extractTopEmployees();
+
+        StringBuilder sb = new StringBuilder();
+
+        for (Employee employeesEntity : employeesEntities) {
+            sb
+                    .append(String.format("Full Name: %s %s"
+                            , employeesEntity.getFirstName()
+                            , employeesEntity.getLastName()))
+                    .append(System.lineSeparator())
+                    .append(String.format("Salary: %.2f", employeesEntity.getSalary()))
+                    .append(System.lineSeparator())
+                    .append(String.format("Started On: %s", String.valueOf(employeesEntity.getStartedOn())))
+                    .append(System.lineSeparator())
+                    .append("Clients: ")
+                    .append(System.lineSeparator());
+
+            for (Client client : employeesEntity.getClients()) {
+                sb
+                        .append(String.format("\t%s", client.getFullName()))
+                        .append(System.lineSeparator());
+            }
+        }
+
+        return sb.toString();
     }
 }

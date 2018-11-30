@@ -68,6 +68,16 @@ public class ClientServiceImpl implements ClientService {
                 continue;
             }
 
+            Client clientCheck = this.clientRepository.findByFullName(String.format("%s %s"
+                    , clientImportDto.getFirstName()
+                    , clientImportDto.getLastName()))
+                    .orElse(null);
+
+            if (clientCheck != null) {
+                sb.append("Incorrect data!").append(System.lineSeparator());
+                continue;
+            }
+
             Client clientEntity = this.modelMapper.map(clientImportDto, Client.class);
             clientEntity.setFullName(String.format("%s %s"
                     , clientImportDto.getFirstName()
@@ -77,7 +87,7 @@ public class ClientServiceImpl implements ClientService {
             this.clientRepository.saveAndFlush(clientEntity);
 
             sb
-                    .append(String.format("Successfully imported Branch - %s"
+                    .append(String.format("Successfully imported Client - %s"
                             , clientEntity.getFullName()))
                     .append(System.lineSeparator());
         }
