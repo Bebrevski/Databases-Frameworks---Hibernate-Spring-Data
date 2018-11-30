@@ -1,6 +1,7 @@
 package app.ccb.services;
 
 import app.ccb.domain.dtos.ClientImportDto;
+import app.ccb.domain.entities.Card;
 import app.ccb.domain.entities.Client;
 import app.ccb.domain.entities.Employee;
 import app.ccb.repositories.ClientRepository;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.List;
 
 @Service
 public class ClientServiceImpl implements ClientService {
@@ -97,7 +99,30 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     public String exportFamilyGuy() {
-        // TODO : Implement Me
-        return null;
+        Client clientEntity = this.clientRepository
+                .exportFamilyGuy()
+                .stream()
+                .findFirst()
+                .orElse(null);
+
+        StringBuilder sb = new StringBuilder();
+
+        sb
+                .append(String.format("Full Name: %s", clientEntity.getFullName()))
+                .append(System.lineSeparator())
+                .append(String.format("Age: %d", clientEntity.getAge()))
+                .append(System.lineSeparator())
+                .append(String.format("Bank Account: %s", clientEntity.getBankAccount().getAccountNumber()))
+                .append(System.lineSeparator());
+
+        for (Card card : clientEntity.getBankAccount().getCards()) {
+            sb
+                    .append(String.format("\tCard Number: %s", card.getCardNumber()))
+                    .append(System.lineSeparator())
+                    .append(String.format("\tCard Status: %s", card.getCardStatus()))
+                    .append(System.lineSeparator());
+        }
+
+        return sb.toString();
     }
 }
