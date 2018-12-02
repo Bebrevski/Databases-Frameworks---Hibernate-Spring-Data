@@ -1,7 +1,9 @@
 package judgesystem.util;
 
+import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
+import java.util.Set;
 
 public class ValidationUtilImpl implements ValidationUtil {
     private Validator validator;
@@ -14,5 +16,10 @@ public class ValidationUtilImpl implements ValidationUtil {
     @Override
     public <E> boolean isValid(E entity) {
         return this.validator.validate(entity).size() == 0;
+    }
+
+    @Override
+    public <T> Set<ConstraintViolation<T>> violations(T entity) {
+        return this.validator.validate(entity);
     }
 }

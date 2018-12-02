@@ -1,4 +1,4 @@
-package judgesystem.entities.base;
+package judgesystem.domain.entities.base;
 
 import javax.persistence.*;
 
@@ -7,7 +7,7 @@ public class BaseEntity {
     private Long id;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+   //@GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     public Long getId() {
         return this.id;

@@ -1,6 +1,6 @@
-package judgesystem.entities;
+package judgesystem.domain.entities;
 
-import judgesystem.entities.base.BaseEntity;
+import judgesystem.domain.entities.base.BaseEntity;
 
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
