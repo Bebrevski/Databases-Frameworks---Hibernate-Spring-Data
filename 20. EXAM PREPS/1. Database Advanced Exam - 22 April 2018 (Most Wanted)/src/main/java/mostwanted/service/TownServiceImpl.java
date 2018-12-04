@@ -1,7 +1,13 @@
 package mostwanted.service;
 
+import com.google.gson.Gson;
+import mostwanted.common.Constants;
+import mostwanted.domain.dtos.TownImportDto;
+import mostwanted.domain.entities.Town;
 import mostwanted.repository.TownRepository;
 import mostwanted.util.FileUtil;
+import mostwanted.util.ValidationUtil;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,10 +21,17 @@ public class TownServiceImpl implements TownService {
     private final TownRepository townRepository;
     private final FileUtil fileUtil;
 
+    private final Gson gson;
+    private final ValidationUtil validationUtil;
+    private final ModelMapper modelMapper;
+
     @Autowired
-    public TownServiceImpl(TownRepository townRepository, FileUtil fileUtil) {
+    public TownServiceImpl(TownRepository townRepository, FileUtil fileUtil, Gson gson, ValidationUtil validationUtil, ModelMapper modelMapper) {
         this.townRepository = townRepository;
         this.fileUtil = fileUtil;
+        this.gson = gson;
+        this.validationUtil = validationUtil;
+        this.modelMapper = modelMapper;
     }
 
     @Override
@@ -33,7 +46,36 @@ public class TownServiceImpl implements TownService {
 
     @Override
     public String importTowns(String townsFileContent) {
-        return null;
+        StringBuilder importResult = new StringBuilder();
+
+        TownImportDto[] townImportDtos = this.gson.fromJson(townsFileContent, TownImportDto[].class);
+        for (TownImportDto townImportDto : townImportDtos) {
+
+            Town townEntity = this.townRepository
+                    .findByName(townImportDto.getName())
+                    .orElse(null);
+
+            if (townEntity != null) {
+                importResult.append(Constants.DUPLICATE_DATA_MESSAGE).append(System.lineSeparator());
+                continue;
+            }
+
+            if (!this.validationUtil.isValid(townImportDto)) {
+                importResult.append(Constants.INCORRECT_DATA_MESSAGE).append(System.lineSeparator());
+                continue;
+            }
+
+            townEntity = this.modelMapper.map(townImportDto, Town.class);
+            this.townRepository.saveAndFlush(townEntity);
+
+            importResult
+                    .append(String.format(Constants.SUCCESSFUL_IMPORT_MESSAGE
+                            , townEntity.getClass().getSimpleName()
+                            , townEntity.getName()))
+                    .append(System.lineSeparator());
+        }
+
+        return importResult.toString();
     }
 
     @Override

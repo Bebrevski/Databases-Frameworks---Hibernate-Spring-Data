@@ -25,22 +25,16 @@ public class ApplicationBeanConfiguration {
 
     @Bean
     public XmlParser xmlParser() {
-        // TODO : Implement me
-        return null;
-        //return new XmlParserImpl();
+        return new XmlParserImpl();
     }
 
     @Bean
     public ValidationUtil validationUtil() {
-        // TODO : Implement me
-        return null;
-        //return new ValidationUtilImpl();
+        return new ValidationUtilImpl();
     }
 
     @Bean
     public ModelMapper modelMapper() {
-        // TODO : Implement me
-        return null;
-        //return new ModelMapper();
+        return new ModelMapper();
     }
 }
