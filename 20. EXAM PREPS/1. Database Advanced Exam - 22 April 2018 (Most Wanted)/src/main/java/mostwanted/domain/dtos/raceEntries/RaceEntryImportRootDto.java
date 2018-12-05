@@ -5,10 +5,10 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement(name = "race-entries")
+@XmlRootElement(name = "races-entries")
 @XmlAccessorType(value = XmlAccessType.FIELD)
 public class RaceEntryImportRootDto {
-    @XmlElement(name = "race-entry")
+    @XmlElement(name = "races-entry")
     private RaceEntryImportDto[] raceEntryImportDtos;
 
     public RaceEntryImportRootDto() {

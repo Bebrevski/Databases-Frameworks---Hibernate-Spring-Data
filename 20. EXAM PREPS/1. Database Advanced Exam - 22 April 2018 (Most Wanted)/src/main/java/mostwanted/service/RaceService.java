@@ -1,5 +1,6 @@
 package mostwanted.service;
 
+import javax.xml.bind.JAXBException;
 import java.io.IOException;
 
 public interface RaceService {
@@ -8,5 +9,5 @@ public interface RaceService {
 
     String readRacesXmlFile() throws IOException;
 
-    String importRaces();
+    String importRaces() throws JAXBException;
 }

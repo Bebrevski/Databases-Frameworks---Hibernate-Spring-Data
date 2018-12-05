@@ -22,7 +22,7 @@ import java.io.IOException;
 @Service
 public class RaceEntryServiceImpl implements RaceEntryService {
 
-    private static final String RACE_ENTRIES_XML_FILE_PATH = System.getProperty("user.dir") + "/src/main/resources/files/race-entries.xml";
+    private static final String RACE_ENTRIES_XML_FILE_PATH = System.getProperty("user.dir") + "/src/main/resources/files/races-entries.xml";
 
     private final RaceEntryRepository raceEntryRepository;
     private final FileUtil fileUtil;
@@ -62,13 +62,7 @@ public class RaceEntryServiceImpl implements RaceEntryService {
         RaceEntryImportRootDto raceEntryImportRootDto = this.xmlParser
                 .parseXml(RaceEntryImportRootDto.class, RACE_ENTRIES_XML_FILE_PATH);
 
-        int raceEntryId = 1;
         for (RaceEntryImportDto raceEntryImportDto : raceEntryImportRootDto.getRaceEntryImportDtos()) {
-            if (!this.validationUtil.isValid(raceEntryImportDto)) {
-                importResult.append(Constants.INCORRECT_DATA_MESSAGE).append(System.lineSeparator());
-                continue;
-            }
-
             Car carEntry = this.carRepository
                     .findById((long) raceEntryImportDto.getCarId())
                     .orElse(null);
@@ -77,19 +71,23 @@ public class RaceEntryServiceImpl implements RaceEntryService {
                     .findByName(raceEntryImportDto.getRacer())
                     .orElse(null);
 
+            if (!this.validationUtil.isValid(raceEntryImportDto) || racerEntity == null || carEntry == null) {
+                importResult.append(Constants.INCORRECT_DATA_MESSAGE).append(System.lineSeparator());
+                continue;
+            }
+
             RaceEntry raceEntryEntity = this.modelMapper.map(raceEntryImportDto, RaceEntry.class);
             raceEntryEntity.setCar(carEntry);
             raceEntryEntity.setRacer(racerEntity);
+            raceEntryEntity.setRace(null);
 
-            this.raceEntryRepository.saveAndFlush(raceEntryEntity);
+            raceEntryEntity = this.raceEntryRepository.saveAndFlush(raceEntryEntity);
 
             importResult
                     .append(String.format(Constants.SUCCESSFUL_IMPORT_MESSAGE
                             , raceEntryEntity.getClass().getSimpleName()
-                            , raceEntryId))
+                            , raceEntryEntity.getId()))
                     .append(System.lineSeparator());
-
-            raceEntryId++;
         }
 
         return importResult.toString();

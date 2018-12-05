@@ -2,7 +2,7 @@ package mostwanted.domain.dtos.raceEntries;
 
 import javax.xml.bind.annotation.*;
 
-@XmlRootElement(name = "race-entry")
+@XmlRootElement(name = "races-entry")
 @XmlAccessorType(value = XmlAccessType.FIELD)
 public class RaceEntryImportDto {
     @XmlAttribute(name = "has-finished")

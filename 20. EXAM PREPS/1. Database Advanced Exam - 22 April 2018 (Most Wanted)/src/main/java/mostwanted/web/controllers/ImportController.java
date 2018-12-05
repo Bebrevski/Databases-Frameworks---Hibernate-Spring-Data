@@ -105,7 +105,7 @@ public class ImportController extends BaseController {
 
     @GetMapping("/race-entries")
     public ModelAndView importRaceEntries() throws IOException {
-        return super.view("xml/import-race-entries", "raceEntries", this.raceEntryService.readRaceEntriesXmlFile());
+        return super.view("xml/import-races-entries", "raceEntries", this.raceEntryService.readRaceEntriesXmlFile());
     }
 
     @PostMapping("/race-entries")
