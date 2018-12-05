@@ -1,10 +1,22 @@
 package mostwanted.service;
 
+import mostwanted.common.Constants;
+import mostwanted.domain.dtos.raceEntries.RaceEntryImportDto;
+import mostwanted.domain.dtos.raceEntries.RaceEntryImportRootDto;
+import mostwanted.domain.entities.Car;
+import mostwanted.domain.entities.RaceEntry;
+import mostwanted.domain.entities.Racer;
+import mostwanted.repository.CarRepository;
 import mostwanted.repository.RaceEntryRepository;
+import mostwanted.repository.RacerRepository;
 import mostwanted.util.FileUtil;
+import mostwanted.util.ValidationUtil;
+import mostwanted.util.XmlParser;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.xml.bind.JAXBException;
 import java.io.IOException;
 
 @Service
@@ -15,10 +27,22 @@ public class RaceEntryServiceImpl implements RaceEntryService {
     private final RaceEntryRepository raceEntryRepository;
     private final FileUtil fileUtil;
 
+    private final XmlParser xmlParser;
+    private final ValidationUtil validationUtil;
+    private final ModelMapper modelMapper;
+
+    private final CarRepository carRepository;
+    private final RacerRepository racerRepository;
+
     @Autowired
-    public RaceEntryServiceImpl(RaceEntryRepository raceEntryRepository, FileUtil fileUtil) {
+    public RaceEntryServiceImpl(RaceEntryRepository raceEntryRepository, FileUtil fileUtil, XmlParser xmlParser, ValidationUtil validationUtil, ModelMapper modelMapper, CarRepository carRepository, RacerRepository racerRepository) {
         this.raceEntryRepository = raceEntryRepository;
         this.fileUtil = fileUtil;
+        this.xmlParser = xmlParser;
+        this.validationUtil = validationUtil;
+        this.modelMapper = modelMapper;
+        this.carRepository = carRepository;
+        this.racerRepository = racerRepository;
     }
 
     @Override
@@ -32,7 +56,42 @@ public class RaceEntryServiceImpl implements RaceEntryService {
     }
 
     @Override
-    public String importRaceEntries() {
-        return null;
+    public String importRaceEntries() throws JAXBException {
+        StringBuilder importResult = new StringBuilder();
+
+        RaceEntryImportRootDto raceEntryImportRootDto = this.xmlParser
+                .parseXml(RaceEntryImportRootDto.class, RACE_ENTRIES_XML_FILE_PATH);
+
+        int raceEntryId = 1;
+        for (RaceEntryImportDto raceEntryImportDto : raceEntryImportRootDto.getRaceEntryImportDtos()) {
+            if (!this.validationUtil.isValid(raceEntryImportDto)) {
+                importResult.append(Constants.INCORRECT_DATA_MESSAGE).append(System.lineSeparator());
+                continue;
+            }
+
+            Car carEntry = this.carRepository
+                    .findById((long) raceEntryImportDto.getCarId())
+                    .orElse(null);
+
+            Racer racerEntity = this.racerRepository
+                    .findByName(raceEntryImportDto.getRacer())
+                    .orElse(null);
+
+            RaceEntry raceEntryEntity = this.modelMapper.map(raceEntryImportDto, RaceEntry.class);
+            raceEntryEntity.setCar(carEntry);
+            raceEntryEntity.setRacer(racerEntity);
+
+            this.raceEntryRepository.saveAndFlush(raceEntryEntity);
+
+            importResult
+                    .append(String.format(Constants.SUCCESSFUL_IMPORT_MESSAGE
+                            , raceEntryEntity.getClass().getSimpleName()
+                            , raceEntryId))
+                    .append(System.lineSeparator());
+
+            raceEntryId++;
+        }
+
+        return importResult.toString();
     }
 }

@@ -3,7 +3,6 @@ package mostwanted.domain.entities;
 import mostwanted.domain.entities.base.BaseEntity;
 
 import javax.persistence.*;
-import java.util.Set;
 
 @Entity(name = "race_entries")
 public class RaceEntry extends BaseEntity {
