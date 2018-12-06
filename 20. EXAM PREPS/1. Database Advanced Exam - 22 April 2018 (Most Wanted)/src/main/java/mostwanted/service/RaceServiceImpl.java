@@ -1,10 +1,9 @@
 package mostwanted.service;
 
 import mostwanted.common.Constants;
-import mostwanted.domain.dtos.RacerImportDto;
-import mostwanted.domain.dtos.races.EntryImportDto;
-import mostwanted.domain.dtos.races.RaceImportDto;
-import mostwanted.domain.dtos.races.RaceImportRootDto;
+import mostwanted.domain.dtos.importDtos.races.EntryImportDto;
+import mostwanted.domain.dtos.importDtos.races.RaceImportDto;
+import mostwanted.domain.dtos.importDtos.races.RaceImportRootDto;
 import mostwanted.domain.entities.District;
 import mostwanted.domain.entities.Race;
 import mostwanted.domain.entities.RaceEntry;

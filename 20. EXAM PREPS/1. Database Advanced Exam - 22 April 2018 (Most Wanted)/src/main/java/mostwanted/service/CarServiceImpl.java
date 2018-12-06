@@ -2,7 +2,7 @@ package mostwanted.service;
 
 import com.google.gson.Gson;
 import mostwanted.common.Constants;
-import mostwanted.domain.dtos.CarImportDto;
+import mostwanted.domain.dtos.importDtos.CarImportDto;
 import mostwanted.domain.entities.Car;
 import mostwanted.domain.entities.Racer;
 import mostwanted.repository.CarRepository;

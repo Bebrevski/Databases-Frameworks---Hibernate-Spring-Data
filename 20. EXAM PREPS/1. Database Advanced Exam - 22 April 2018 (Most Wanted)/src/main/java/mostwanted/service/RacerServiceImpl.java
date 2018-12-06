@@ -2,7 +2,8 @@ package mostwanted.service;
 
 import com.google.gson.Gson;
 import mostwanted.common.Constants;
-import mostwanted.domain.dtos.RacerImportDto;
+import mostwanted.domain.dtos.importDtos.RacerImportDto;
+import mostwanted.domain.entities.Car;
 import mostwanted.domain.entities.Racer;
 import mostwanted.domain.entities.Town;
 import mostwanted.repository.RacerRepository;
@@ -14,9 +15,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.Set;
 
 @Service
-public class RacerServiceImpl implements RacerService{
+public class RacerServiceImpl implements RacerService {
 
     private static final String RACERS_JSON_FILE_PATH = System.getProperty("user.dir") + "/src/main/resources/files/racers.json";
 
@@ -91,6 +93,32 @@ public class RacerServiceImpl implements RacerService{
 
     @Override
     public String exportRacingCars() {
-        return null;
+        Set<Racer> racers = this.racerRepository.exportRacingCars();
+
+        StringBuilder exportResult = new StringBuilder();
+
+        for (Racer racer : racers) {
+
+            if (racer.getAge() == null) continue;
+
+            exportResult
+                    .append(String.format("Name: %s", racer.getName()))
+                    .append(System.lineSeparator())
+                    .append("Cars:")
+                    .append(System.lineSeparator());
+
+            for (Car car : racer.getCars()) {
+                exportResult
+                        .append(String.format("\t%s %s %d"
+                                , car.getBrand()
+                                , car.getModel()
+                                , car.getYearOfProduction()))
+                        .append(System.lineSeparator());
+            }
+
+            exportResult.append(System.lineSeparator());
+        }
+
+        return exportResult.toString();
     }
 }

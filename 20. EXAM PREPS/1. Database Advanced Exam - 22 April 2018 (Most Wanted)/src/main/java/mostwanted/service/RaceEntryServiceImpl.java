@@ -1,8 +1,8 @@
 package mostwanted.service;
 
 import mostwanted.common.Constants;
-import mostwanted.domain.dtos.raceEntries.RaceEntryImportDto;
-import mostwanted.domain.dtos.raceEntries.RaceEntryImportRootDto;
+import mostwanted.domain.dtos.importDtos.raceEntries.RaceEntryImportDto;
+import mostwanted.domain.dtos.importDtos.raceEntries.RaceEntryImportRootDto;
 import mostwanted.domain.entities.Car;
 import mostwanted.domain.entities.RaceEntry;
 import mostwanted.domain.entities.Racer;

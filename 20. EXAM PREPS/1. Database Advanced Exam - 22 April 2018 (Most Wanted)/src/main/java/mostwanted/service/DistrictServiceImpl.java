@@ -2,7 +2,7 @@ package mostwanted.service;
 
 import com.google.gson.Gson;
 import mostwanted.common.Constants;
-import mostwanted.domain.dtos.DistrictImportDto;
+import mostwanted.domain.dtos.importDtos.DistrictImportDto;
 import mostwanted.domain.entities.District;
 import mostwanted.domain.entities.Town;
 import mostwanted.repository.DistrictRepository;

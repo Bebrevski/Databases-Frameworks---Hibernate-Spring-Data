@@ -2,7 +2,7 @@ package mostwanted.service;
 
 import com.google.gson.Gson;
 import mostwanted.common.Constants;
-import mostwanted.domain.dtos.TownImportDto;
+import mostwanted.domain.dtos.importDtos.TownImportDto;
 import mostwanted.domain.entities.Town;
 import mostwanted.repository.TownRepository;
 import mostwanted.util.FileUtil;
@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.List;
 
 @Service
 public class TownServiceImpl implements TownService {
@@ -80,6 +81,19 @@ public class TownServiceImpl implements TownService {
 
     @Override
     public String exportRacingTowns() {
-        return null;
+        List<Town> towns = this.townRepository.exportRacingTowns();
+
+        StringBuilder exportResult = new StringBuilder();
+
+        for (Town town : towns) {
+            exportResult
+                    .append(String.format("Name: %s", town.getName()))
+                    .append(System.lineSeparator())
+                    .append(String.format("Racers: %d", town.getRacers().size()))
+                    .append(System.lineSeparator())
+                    .append(System.lineSeparator());
+        }
+
+        return exportResult.toString();
     }
 }
