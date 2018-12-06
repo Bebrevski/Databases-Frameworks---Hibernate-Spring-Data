@@ -1,2 +1,2 @@
-# JS-Aplications
-Third course of JS Core module
+Databases-Frameworks---Hibernate-Spring-Data
+Java - SoftUni course. Second part of Java DB Fundamentals module
