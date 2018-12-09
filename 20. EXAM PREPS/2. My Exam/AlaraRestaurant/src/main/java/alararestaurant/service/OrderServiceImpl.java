@@ -72,60 +72,59 @@ public class OrderServiceImpl implements OrderService {
     public String importOrders() throws JAXBException, ParseException {
         StringBuilder importResult = new StringBuilder();
 
-        OrderImportXmlRootDto orderImportXmlRootDto = this.xmlParser.parseXml(OrderImportXmlRootDto.class, ORDERS_XML_FILE_PATH);
+        OrderImportXmlRootDto orderImportXmlRootDto = this.xmlParser
+                .parseXml(OrderImportXmlRootDto.class, ORDERS_XML_FILE_PATH);
 
         for (OrderImportXmlDto orderImportXmlDto : orderImportXmlRootDto.getOrderImportXmlDtos()) {
-            if (!this.validationUtil.isValid(orderImportXmlDto)) {
+            Employee employeeEntity = this.employeeRepository
+                    .findByName(orderImportXmlDto.getEmployee())
+                    .orElse(null);
+
+            if (!this.validationUtil.isValid(orderImportXmlDto) || employeeEntity == null) {
                 importResult.append(Constants.INCORRECT_DATA_MESSAGE).append(System.lineSeparator());
                 continue;
             }
 
-            Employee employeeEntity = this.employeeRepository.findByName(orderImportXmlDto.getEmployee()).orElse(null);
-            if (employeeEntity == null) {
-                importResult.append(Constants.INCORRECT_DATA_MESSAGE).append(System.lineSeparator());
-                continue;
-            }
+            Order orderEntity = new Order();
+            orderEntity.setCustomer(orderImportXmlDto.getCustomer());
+            orderEntity.setDateTime(LocalDateTime.parse(orderImportXmlDto.getDateTime(), DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));
+            orderEntity.setType(orderImportXmlDto.getType());
+            orderEntity.setEmployee(employeeEntity);
 
+            Boolean hasInvalidItem = false;
             List<OrderItem> orderItems = new ArrayList<>();
             for (ItemImportXmlDto itemImportXmlDto : orderImportXmlDto.getItemImportXmlRootDto().getItemImportXmlDtos()) {
-                Item itemEntity = this.itemRepository.findByName(itemImportXmlDto.getName()).orElse(null);
+                Item itemEntity = this.itemRepository.findByName(itemImportXmlDto.getName())
+                        .orElse(null);
 
                 if (itemEntity == null) {
-                    importResult.append(Constants.INCORRECT_DATA_MESSAGE).append(System.lineSeparator());
-                    continue;
+                    hasInvalidItem = true;
+                    break;
                 }
-
-                this.itemRepository.saveAndFlush(itemEntity);
 
                 OrderItem orderItemEntity = new OrderItem();
+                orderItemEntity.setOrder(orderEntity);
                 orderItemEntity.setItem(itemEntity);
                 orderItemEntity.setQuantity(itemImportXmlDto.getQuantity());
-
-                if (!this.validationUtil.isValid(orderItemEntity)) {
-                    importResult.append(Constants.INCORRECT_DATA_MESSAGE).append(System.lineSeparator());
-                    continue;
-                }
 
                 orderItems.add(orderItemEntity);
             }
 
-            Order orderEntity = this.modelMapper.map(orderImportXmlDto, Order.class);
-            orderEntity.setEmployee(employeeEntity);
-            orderEntity.setOrderItems(orderItems);
-
-            String dateInString = orderImportXmlDto.getDateTime();
-
-            LocalDateTime date = LocalDateTime.parse(dateInString, DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
-
-            orderEntity.setDateTime(date);
-
-            orderEntity = this.orderRepository.saveAndFlush(orderEntity);
-
-            for (OrderItem orderItem : orderItems) {
-                orderItem.setOrder(orderEntity);
+            if (!hasInvalidItem) {
+                orderEntity = this.orderRepository.saveAndFlush(orderEntity);
+                for (OrderItem orderItem : orderItems) {
+                    this.orderItemRepository.saveAndFlush(orderItem);
+                }
+            } else {
+                importResult.append(Constants.INCORRECT_DATA_MESSAGE).append(System.lineSeparator());
+                continue;
             }
 
-            this.orderItemRepository.saveAll(orderItems);
+            importResult
+                    .append(String.format("Order for %s on %s added"
+                            , orderEntity.getCustomer()
+                            , orderEntity.getDateTime()))
+                    .append(System.lineSeparator());
         }
 
         return importResult.toString();

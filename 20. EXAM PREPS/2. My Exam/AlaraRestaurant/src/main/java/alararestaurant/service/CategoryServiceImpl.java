@@ -20,9 +20,8 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public String exportCategoriesByCountOfItems() {
+        List<Category> categories = this.categoryRepository.exportCategoriesByCountOfItems();
         StringBuilder exportResult = new StringBuilder();
-
-        List<Category> categories = this.categoryRepository.findAll();
 
         for (Category category : categories) {
             exportResult
@@ -31,9 +30,8 @@ public class CategoryServiceImpl implements CategoryService {
 
             for (Item item : category.getItems()) {
                 exportResult
-                        .append(String.format("---Item Name: %s", item.getName()))
-                        .append(System.lineSeparator())
-                        .append(String.format("---Item Price: %.2f", item.getPrice()))
+                        .append(String.format("---ItemName: %s", item.getName())).append(System.lineSeparator())
+                        .append(String.format("---ItemPrice: %.2f", item.getPrice())).append(System.lineSeparator())
                         .append(System.lineSeparator());
             }
 

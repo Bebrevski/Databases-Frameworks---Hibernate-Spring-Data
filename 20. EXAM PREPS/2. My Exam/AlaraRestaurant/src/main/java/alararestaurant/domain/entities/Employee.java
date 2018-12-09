@@ -3,9 +3,6 @@ package alararestaurant.domain.entities;
 import alararestaurant.domain.entities.base.BaseEntity;
 
 import javax.persistence.*;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.Size;
 import java.util.List;
 
 @Entity(name = "employees")

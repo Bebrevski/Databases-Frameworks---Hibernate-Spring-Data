@@ -1,4 +1,4 @@
-package alararestaurant.domain.dtos;
+package alararestaurant.domain.dtos.employees;
 
 import com.google.gson.annotations.Expose;
 

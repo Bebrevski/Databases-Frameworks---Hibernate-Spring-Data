@@ -1,4 +1,4 @@
-package alararestaurant.domain.dtos;
+package alararestaurant.domain.dtos.items;
 
 import com.google.gson.annotations.Expose;
 
@@ -39,6 +39,7 @@ public class ItemsImportJsonDto {
     }
 
     @NotNull
+    @Size(min = 3, max = 30)
     public String getCategory() {
         return this.category;
     }

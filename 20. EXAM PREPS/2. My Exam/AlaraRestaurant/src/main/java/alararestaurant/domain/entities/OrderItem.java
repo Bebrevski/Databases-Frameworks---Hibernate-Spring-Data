@@ -6,7 +6,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.validation.constraints.Min;
 
 @Entity(name = "order_items")
 public class OrderItem extends BaseEntity {
@@ -38,7 +37,6 @@ public class OrderItem extends BaseEntity {
     }
 
     @Column(name = "quantity", nullable = false)
-    @Min(1)
     public Integer getQuantity() {
         return this.quantity;
     }

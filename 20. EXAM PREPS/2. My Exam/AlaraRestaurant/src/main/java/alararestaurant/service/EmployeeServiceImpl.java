@@ -1,7 +1,7 @@
 package alararestaurant.service;
 
 import alararestaurant.constants.Constants;
-import alararestaurant.domain.dtos.EmployeeImportJsonDto;
+import alararestaurant.domain.dtos.employees.EmployeeImportJsonDto;
 import alararestaurant.domain.entities.Employee;
 import alararestaurant.domain.entities.Position;
 import alararestaurant.repository.EmployeeRepository;
@@ -52,40 +52,32 @@ public class EmployeeServiceImpl implements EmployeeService {
     public String importEmployees(String employees) {
         StringBuilder importResult = new StringBuilder();
 
-        EmployeeImportJsonDto[] employeeImportJsonDtos = this.gson.fromJson(employees, EmployeeImportJsonDto[].class);
+        EmployeeImportJsonDto[] employeeImportJsonDto = this.gson.fromJson(employees, EmployeeImportJsonDto[].class);
 
-        for (EmployeeImportJsonDto employeeImportJsonDto : employeeImportJsonDtos) {
-            Position position = this.positionRepository
-                    .findByName(employeeImportJsonDto.getPosition())
-                    .orElse(null);
-
-            if (position == null) {
-                position = new Position();
-                position.setName(employeeImportJsonDto.getPosition());
-            }
-
-            if (!this.validationUtil.isValid(employeeImportJsonDto) || !this.validationUtil.isValid(position)) {
+        for (EmployeeImportJsonDto importJsonDto : employeeImportJsonDto) {
+            if (!this.validationUtil.isValid(importJsonDto)) {
                 importResult.append(Constants.INCORRECT_DATA_MESSAGE).append(System.lineSeparator());
                 continue;
             }
 
-            if (this.positionRepository
-                    .findByName(position.getName())
-                    .orElse(null) == null) {
-                position = this.positionRepository.saveAndFlush(position);
+            Position positionEntity = this.positionRepository
+                    .findByName(importJsonDto.getPosition())
+                    .orElse(null);
+
+            if (positionEntity == null) {
+                positionEntity = new Position();
+                positionEntity.setName(importJsonDto.getPosition());
+                positionEntity = this.positionRepository.saveAndFlush(positionEntity);
             }
 
-            Employee employeeEntity = this.modelMapper.map(employeeImportJsonDto, Employee.class);
-            employeeEntity.setPosition(position);
+            Employee employeeEntity = this.modelMapper.map(importJsonDto, Employee.class);
+            employeeEntity.setPosition(positionEntity);
 
-            employeeEntity = this.employeeRepository.saveAndFlush(employeeEntity);
-
-            //Useless
-            //position.getEmployees().add(employeeEntity);
-            //this.positionRepository.saveAll(position.getEmployees());
+            this.employeeRepository.saveAndFlush(employeeEntity);
 
             importResult
-                    .append(String.format(Constants.SUCCESSFULLY_IMPORTED__EMPLOYEE_MESSAGE, employeeEntity.getName()))
+                    .append(String.format("Record %s successfully imported."
+                            , employeeEntity.getName()))
                     .append(System.lineSeparator());
         }
 

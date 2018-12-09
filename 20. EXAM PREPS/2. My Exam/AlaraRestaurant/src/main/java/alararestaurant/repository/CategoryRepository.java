@@ -17,6 +17,6 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
             "FROM alararestaurant.domain.entities.Category AS c " +
             "JOIN c.items AS i " +
             "GROUP BY c.id " +
-            "ORDER BY size(i) DESC ")
+            "ORDER BY size(i) DESC, SUM(i.price) DESC ")
     List<Category> exportCategoriesByCountOfItems();
 }

@@ -1,7 +1,7 @@
 package alararestaurant.service;
 
 import alararestaurant.constants.Constants;
-import alararestaurant.domain.dtos.ItemsImportJsonDto;
+import alararestaurant.domain.dtos.items.ItemsImportJsonDto;
 import alararestaurant.domain.entities.Category;
 import alararestaurant.domain.entities.Item;
 import alararestaurant.repository.CategoryRepository;
@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 
 @Service
 public class ItemServiceImpl implements ItemService {
@@ -57,41 +56,38 @@ public class ItemServiceImpl implements ItemService {
         ItemsImportJsonDto[] itemsImportJsonDtos = this.gson.fromJson(items, ItemsImportJsonDto[].class);
 
         for (ItemsImportJsonDto itemsImportJsonDto : itemsImportJsonDtos) {
-            Category category = this.categoryRepository
+            if (!this.validationUtil.isValid(itemsImportJsonDto)) {
+                importResult.append(Constants.INCORRECT_DATA_MESSAGE).append(System.lineSeparator());
+                continue;
+            }
+
+            Category categoryEntity = this.categoryRepository
                     .findByName(itemsImportJsonDto.getCategory())
                     .orElse(null);
 
-            if (category == null) {
-                category = new Category();
-                category.setName(itemsImportJsonDto.getCategory());
+            if (categoryEntity == null) {
+                categoryEntity = new Category();
+                categoryEntity.setName(itemsImportJsonDto.getCategory());
+                categoryEntity = this.categoryRepository.saveAndFlush(categoryEntity);
             }
 
-            if (!this.validationUtil.isValid(itemsImportJsonDto) || !this.validationUtil.isValid(category)) {
+            Item itemEntity = this.itemRepository
+                    .findByName(itemsImportJsonDto.getName())
+                    .orElse(null);
+
+            if (itemEntity != null) {
                 importResult.append(Constants.INCORRECT_DATA_MESSAGE).append(System.lineSeparator());
                 continue;
             }
 
-            Item itemEntity = this.modelMapper.map(itemsImportJsonDto, Item.class);
+            itemEntity = this.modelMapper.map(itemsImportJsonDto, Item.class);
+            itemEntity.setCategory(categoryEntity);
 
-            if (this.categoryRepository
-                    .findByName(category.getName())
-                    .orElse(null) == null) {
-                category = this.categoryRepository.saveAndFlush(category);
-            }
-
-            itemEntity.setCategory(category);
-
-            Item existingItemEntity = this.itemRepository.findByName(itemEntity.getName()).orElse(null);
-
-            if (existingItemEntity == null) {
-                itemEntity = this.itemRepository.saveAndFlush(itemEntity);
-            } else {
-                importResult.append(Constants.INCORRECT_DATA_MESSAGE).append(System.lineSeparator());
-                continue;
-            }
+            this.itemRepository.saveAndFlush(itemEntity);
 
             importResult
-                    .append(String.format(Constants.SUCCESSFULLY_IMPORTED__EMPLOYEE_MESSAGE, itemEntity.getName()))
+                    .append(String.format("Record %s successfully imported."
+                            , itemEntity.getName()))
                     .append(System.lineSeparator());
         }
 

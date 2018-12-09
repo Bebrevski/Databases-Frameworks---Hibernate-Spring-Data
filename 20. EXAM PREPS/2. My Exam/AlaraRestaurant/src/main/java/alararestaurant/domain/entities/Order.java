@@ -10,7 +10,7 @@ import java.util.List;
 public class Order extends BaseEntity {
     private String customer;
     private LocalDateTime dateTime;
-    private OrderType type;
+    private String type;
     private Employee employee;
     private List<OrderItem> orderItems;
 
@@ -35,13 +35,12 @@ public class Order extends BaseEntity {
         this.dateTime = dateTime;
     }
 
-    @Column(name = "type")
-    @Enumerated(value = EnumType.STRING)
-    public OrderType getType() {
+    @Column(name = "type", columnDefinition = "ENUM('ForHere', 'ToGo') default 'ForHere'")
+    public String getType() {
         return this.type;
     }
 
-    public void setType(OrderType type) {
+    public void setType(String type) {
         this.type = type;
     }
 
