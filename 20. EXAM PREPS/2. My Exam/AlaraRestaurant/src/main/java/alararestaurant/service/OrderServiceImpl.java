@@ -15,20 +15,15 @@ import alararestaurant.repository.OrderRepository;
 import alararestaurant.util.FileUtil;
 import alararestaurant.util.ValidationUtil;
 import alararestaurant.util.XmlParser;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Service
@@ -43,18 +38,16 @@ public class OrderServiceImpl implements OrderService {
     private final FileUtil fileUtil;
 
     private final XmlParser xmlParser;
-    private final ModelMapper modelMapper;
     private final ValidationUtil validationUtil;
 
     @Autowired
-    public OrderServiceImpl(OrderRepository orderRepository, EmployeeRepository employeeRepository, OrderItemRepository orderItemRepository, ItemRepository itemRepository, FileUtil fileUtil, XmlParser xmlParser, ModelMapper modelMapper, ValidationUtil validationUtil) {
+    public OrderServiceImpl(OrderRepository orderRepository, EmployeeRepository employeeRepository, OrderItemRepository orderItemRepository, ItemRepository itemRepository, FileUtil fileUtil, XmlParser xmlParser, ValidationUtil validationUtil) {
         this.orderRepository = orderRepository;
         this.employeeRepository = employeeRepository;
         this.orderItemRepository = orderItemRepository;
         this.itemRepository = itemRepository;
         this.fileUtil = fileUtil;
         this.xmlParser = xmlParser;
-        this.modelMapper = modelMapper;
         this.validationUtil = validationUtil;
     }
 
@@ -132,7 +125,28 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public String exportOrdersFinishedByTheBurgerFlippers() {
-        // TODO : Implement me
-        return null;
+        List<Order> orders = this.orderRepository.getOrdersFinishedBy("Burger Flipper");
+        StringBuilder exportResult = new StringBuilder();
+
+        for (Order order : orders) {
+            exportResult
+                    .append(String.format("Name: %s", order.getEmployee().getName())).append(System.lineSeparator())
+                    .append("Orders:").append(System.lineSeparator())
+                    .append(String.format("\tCustomer: %s", order.getCustomer())).append(System.lineSeparator())
+                    .append("\tItems:").append(System.lineSeparator());
+
+
+            for (OrderItem orderItem : order.getOrderItems()) {
+                exportResult
+                        .append(String.format("\t\tName: %s", orderItem.getItem().getName())).append(System.lineSeparator())
+                        .append(String.format("\t\tPrice: %.2f", orderItem.getItem().getPrice())).append(System.lineSeparator())
+                        .append(String.format("\t\tQuantity: %s", orderItem.getQuantity())).append(System.lineSeparator())
+                        .append(System.lineSeparator());
+            }
+
+            exportResult.append(System.lineSeparator());
+        }
+
+        return exportResult.toString();
     }
 }
