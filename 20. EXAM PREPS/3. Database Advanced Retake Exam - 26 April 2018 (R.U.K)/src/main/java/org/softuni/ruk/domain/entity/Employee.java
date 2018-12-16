@@ -5,6 +5,7 @@ import org.softuni.ruk.domain.entity.base.BaseEntity;
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity(name = "employees")
@@ -17,6 +18,7 @@ public class Employee extends BaseEntity {
     private List<Client> clients;
 
     public Employee() {
+        this.clients = new ArrayList<>();
     }
 
     @Column(name = "first_name", nullable = false)
